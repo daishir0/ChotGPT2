@@ -31,8 +31,8 @@ class ChotGPTApp {
         return fetch(url, { ...options, ...defaultOptions });
     }
     
-    init() {
-        this.loadSettings();
+    async init() {
+        await this.loadSettings();
         this.bindEvents();
         this.loadThreads();
         this.preventDoubleTabZoom();
@@ -893,26 +893,71 @@ class ChotGPTApp {
         this.showModal('settingsModal');
     }
     
-    saveSettings() {
+    async saveSettings() {
         this.settings.model = document.getElementById('modelSelect').value;
         this.settings.systemPrompt = document.getElementById('systemPrompt').value;
         this.settings.theme = document.querySelector('input[name="theme"]:checked').value;
         
         this.applyTheme();
-        this.storeSettings();
+        await this.storeSettings();
         this.hideModal('settingsModal');
     }
     
-    loadSettings() {
-        const stored = localStorage.getItem('chotgpt-settings');
-        if (stored) {
-            this.settings = { ...this.settings, ...JSON.parse(stored) };
+    async loadSettings() {
+        try {
+            // Load settings from server
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/settings.php?action=get`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.settings = { ...this.settings, ...data.settings };
+            } else {
+                console.error('Failed to load settings:', data.error);
+                // Use default settings if server fails
+                this.settings = {
+                    model: 'gpt-4o-mini',
+                    systemPrompt: 'You are a helpful assistant.',
+                    theme: 'dark'
+                };
+            }
+        } catch (error) {
+            console.error('Settings load error:', error);
+            // Use default settings on error
+            this.settings = {
+                model: 'gpt-4o-mini',
+                systemPrompt: 'You are a helpful assistant.',
+                theme: 'dark'
+            };
         }
+        
         this.applyTheme();
     }
     
-    storeSettings() {
-        localStorage.setItem('chotgpt-settings', JSON.stringify(this.settings));
+    async storeSettings() {
+        try {
+            // Save to server
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/settings.php?action=save`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    settings: this.settings,
+                    csrf_token: window.csrfToken
+                })
+            });
+            
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to save settings');
+            }
+            
+            console.log('Settings saved to server');
+        } catch (error) {
+            console.error('Settings save error:', error);
+            alert('設定の保存中にエラーが発生しました。サーバーに接続できません。');
+            throw error; // Re-throw to prevent silent failures
+        }
     }
     
     applyTheme() {
