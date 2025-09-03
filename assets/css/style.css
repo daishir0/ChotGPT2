@@ -361,6 +361,7 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
+    touch-action: manipulation;
 }
 
 .welcome-message {
@@ -402,6 +403,8 @@ body {
     padding: 16px;
     border-radius: var(--radius);
     position: relative;
+    touch-action: manipulation;
+    user-select: text;
 }
 
 .message.user .message-content {
@@ -962,4 +965,36 @@ body {
     .messages-container {
         padding: 16px;
     }
+}
+
+/* Mobile Touch Optimization - Prevent double-tap zoom */
+* {
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Specific elements that need stronger zoom prevention */
+body,
+html,
+.app-container,
+.main-content,
+.messages-container,
+.message,
+.message-content,
+.message-text {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Re-enable text selection only for message text */
+.message-text {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
 }

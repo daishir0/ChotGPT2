@@ -33,6 +33,7 @@ class ChotGPTApp {
         this.loadSettings();
         this.bindEvents();
         this.loadThreads();
+        this.preventDoubleTabZoom();
     }
     
     bindEvents() {
@@ -390,6 +391,9 @@ class ChotGPTApp {
                 ${actionsHTML}
             </div>
         `;
+        
+        // Add double-tap prevention to dynamically created messages
+        this.addDoubleTabPreventionToElement(messageDiv);
         
         return messageDiv;
     }
@@ -855,6 +859,60 @@ class ChotGPTApp {
         document.body.style.overflow = ''; // Restore scrolling
     }
     
+    // Prevent double-tap zoom on mobile devices
+    preventDoubleTabZoom() {
+        let lastTouchEnd = 0;
+        
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // Additional prevention for specific elements
+        const elements = document.querySelectorAll('.message, .message-content, .message-text, .messages-container');
+        elements.forEach(element => {
+            let tapCount = 0;
+            let tapTimeout;
+            
+            element.addEventListener('touchstart', function(event) {
+                tapCount++;
+                if (tapCount === 1) {
+                    tapTimeout = setTimeout(function() {
+                        tapCount = 0;
+                    }, 300);
+                } else if (tapCount === 2) {
+                    clearTimeout(tapTimeout);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    tapCount = 0;
+                }
+            }, { passive: false });
+        });
+    }
+    
+    // Helper method to add double-tap prevention to a specific element
+    addDoubleTabPreventionToElement(element) {
+        let tapCount = 0;
+        let tapTimeout;
+        
+        element.addEventListener('touchstart', function(event) {
+            tapCount++;
+            if (tapCount === 1) {
+                tapTimeout = setTimeout(function() {
+                    tapCount = 0;
+                }, 300);
+            } else if (tapCount === 2) {
+                clearTimeout(tapTimeout);
+                event.preventDefault();
+                event.stopPropagation();
+                tapCount = 0;
+            }
+        }, { passive: false });
+    }
+
     // Thread management methods
     async editThreadName(threadId, currentName) {
         const newName = prompt('スレッド名を編集:', currentName);
