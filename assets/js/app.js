@@ -5,6 +5,8 @@ class ChotGPTApp {
         this.currentThread = null;
         this.currentMessageId = null;
         this.selectedFiles = [];
+        this.allThreads = []; // Store all threads for search
+        this.filteredThreads = []; // Store filtered threads
         this.settings = {
             model: 'gpt-4o-mini',
             systemPrompt: 'You are a helpful assistant.',
@@ -97,6 +99,29 @@ class ChotGPTApp {
             this.closeMobileMenu();
         });
         
+        // Thread Search
+        const threadSearch = document.getElementById('threadSearch');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+        
+        threadSearch.addEventListener('input', (e) => {
+            this.searchThreads(e.target.value);
+            this.updateSearchClearButton(e.target.value);
+        });
+        
+        threadSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.selectFirstSearchResult();
+            } else if (e.key === 'Escape') {
+                this.clearSearch();
+                threadSearch.blur();
+            }
+        });
+        
+        searchClearBtn.addEventListener('click', () => {
+            this.clearSearch();
+        });
+        
         // Edit Message Modal
         document.getElementById('editMessageClose').addEventListener('click', () => {
             this.hideModal('editMessageModal');
@@ -166,7 +191,9 @@ class ChotGPTApp {
             const data = await response.json();
             
             if (data.success) {
-                this.renderThreads(data.threads);
+                this.allThreads = data.threads;
+                this.filteredThreads = [...data.threads];
+                this.renderThreads(this.filteredThreads);
             }
         } catch (error) {
             console.error('Failed to load threads:', error);
@@ -226,6 +253,69 @@ class ChotGPTApp {
             
             threadList.appendChild(threadElement);
         });
+    }
+    
+    // Thread Search Methods
+    searchThreads(query) {
+        if (!query.trim()) {
+            this.filteredThreads = [...this.allThreads];
+            this.updateSearchResultsInfo('');
+        } else {
+            const normalizedQuery = query.toLowerCase().trim();
+            this.filteredThreads = this.allThreads.filter(thread => 
+                thread.name.toLowerCase().includes(normalizedQuery)
+            );
+            this.updateSearchResultsInfo(query);
+        }
+        this.renderThreads(this.filteredThreads);
+    }
+    
+    updateSearchClearButton(value) {
+        const clearBtn = document.getElementById('searchClearBtn');
+        if (value.trim()) {
+            clearBtn.classList.add('visible');
+        } else {
+            clearBtn.classList.remove('visible');
+        }
+    }
+    
+    updateSearchResultsInfo(query) {
+        const resultsInfo = document.getElementById('searchResultsInfo');
+        if (!query.trim()) {
+            resultsInfo.style.display = 'none';
+            return;
+        }
+        
+        const count = this.filteredThreads.length;
+        const totalCount = this.allThreads.length;
+        
+        if (count === 0) {
+            resultsInfo.textContent = '該当するスレッドが見つかりません';
+            resultsInfo.style.color = 'var(--error-color)';
+        } else if (count === totalCount) {
+            resultsInfo.textContent = `全 ${totalCount} 件のスレッド`;
+            resultsInfo.style.color = 'var(--text-secondary)';
+        } else {
+            resultsInfo.textContent = `${count} / ${totalCount} 件のスレッド`;
+            resultsInfo.style.color = 'var(--text-secondary)';
+        }
+        resultsInfo.style.display = 'block';
+    }
+    
+    clearSearch() {
+        const searchInput = document.getElementById('threadSearch');
+        searchInput.value = '';
+        this.filteredThreads = [...this.allThreads];
+        this.renderThreads(this.filteredThreads);
+        this.updateSearchClearButton('');
+        this.updateSearchResultsInfo('');
+    }
+    
+    selectFirstSearchResult() {
+        if (this.filteredThreads.length > 0) {
+            const firstThread = this.filteredThreads[0];
+            this.selectThread(firstThread.id, firstThread.name);
+        }
     }
     
     selectThread(threadId, threadName) {

@@ -87,6 +87,71 @@ body {
     background-color: #3b82f6;
 }
 
+/* Thread Search */
+.thread-search {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 35px 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.search-clear-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.search-clear-btn.visible {
+    opacity: 1;
+}
+
+.search-results-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    padding: 0 2px;
+}
+
 .thread-list {
     flex: 1;
     overflow-y: auto;

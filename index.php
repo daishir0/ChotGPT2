@@ -56,6 +56,15 @@ $csrfToken = $auth->generateCSRFToken();
                 </button>
             </div>
             
+            <!-- Thread Search -->
+            <div class="thread-search">
+                <div class="search-input-container">
+                    <input type="text" id="threadSearch" placeholder="🔍 スレッドを検索..." class="search-input">
+                    <button class="search-clear-btn" id="searchClearBtn" title="クリア">×</button>
+                </div>
+                <div class="search-results-info" id="searchResultsInfo" style="display: none;"></div>
+            </div>
+            
             <div class="thread-list" id="threadList">
                 <!-- スレッド一覧がここに動的に読み込まれます -->
             </div>
