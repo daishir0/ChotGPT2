@@ -1,18 +1,22 @@
 <?php
+ini_set('memory_limit', '256M');
+ini_set('max_execution_time', 60);
 header('Content-Type: application/json');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// 基本認証チェック
+if (!isset($_SERVER['PHP_AUTH_USER'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Authentication required']);
+    exit;
 }
 
-require_once '../classes/Database.php';
-require_once '../classes/Auth.php';
-require_once '../classes/Logger.php';
-require_once '../classes/ChatManager.php';
-require_once '../classes/DatabaseInitializer.php';
-
 try {
-    // データベースを初期化（初回起動時のみ作成）
+    require_once '../classes/Database.php';
+    require_once '../classes/Auth.php';
+    require_once '../classes/Logger.php';
+    require_once '../classes/ChatManager.php';
+    require_once '../classes/DatabaseInitializer.php';
+    
     $dbInitializer = new DatabaseInitializer(__DIR__ . '/../config.php');
     $config = $dbInitializer->initializeDatabase();
     $logger = new Logger($config);
@@ -39,7 +43,25 @@ try {
     
     switch ($action) {
         case 'list':
-            handleList($chatManager);
+            $threads = $chatManager->getThreads();
+            
+            // UTF-8エンコーディング修正
+            $cleanThreads = array_map(function($thread) {
+                foreach ($thread as $key => $value) {
+                    if (is_string($value)) {
+                        // 不正なUTF-8文字を削除・修正
+                        $thread[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+                        // 制御文字を除去
+                        $thread[$key] = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $thread[$key]);
+                    }
+                }
+                return $thread;
+            }, $threads);
+            
+            echo json_encode([
+                'success' => true,
+                'threads' => $cleanThreads
+            ]);
             break;
             
         case 'create':
@@ -70,17 +92,27 @@ try {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
     if (isset($logger)) {
-        $logger->error('Threads API Error', ['error' => $e->getMessage()]);
+        $logger->error('Threads API Error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
     }
+} catch (Error $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'PHP Error: ' . $e->getMessage()]);
+    error_log('Threads API PHP Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Unexpected error: ' . $e->getMessage()]);
+    error_log('Threads API Unexpected Error: ' . $e->getMessage());
 }
 
 function handleList($chatManager) {
     $threads = $chatManager->getThreads();
     
-    echo json_encode([
+    $response = json_encode([
         'success' => true,
         'threads' => $threads
     ]);
+    
+    echo $response;
 }
 
 function handleCreate($chatManager, $auth, $data) {
