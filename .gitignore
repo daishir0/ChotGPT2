@@ -1,0 +1,6 @@
+config.php
+*.db
+logs/
+uploads/
+.claude/
+tests/
