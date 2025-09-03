@@ -91,6 +91,8 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 12px;
+    -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+    scroll-behavior: smooth;
 }
 
 .thread-item {
@@ -113,6 +115,8 @@ body {
     cursor: pointer;
     text-align: left;
     min-width: 0;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    touch-action: manipulation; /* Disable 300ms delay */
 }
 
 .thread-actions {
@@ -913,6 +917,8 @@ body {
         width: 280px;
         position: fixed;
         left: -280px;
+        top: 0;
+        height: 100vh;
         z-index: 100;
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);

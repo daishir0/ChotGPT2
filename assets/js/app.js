@@ -199,6 +199,17 @@ class ChotGPTApp {
                 this.selectThread(thread.id, thread.name);
             });
             
+            // Add touchstart event for better mobile responsiveness
+            threadContent.addEventListener('touchstart', (e) => {
+                // Prevent hover effects on touch devices
+                e.preventDefault();
+            }, { passive: false });
+            
+            threadContent.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.selectThread(thread.id, thread.name);
+            }, { passive: false });
+            
             // Edit button event
             const editBtn = threadElement.querySelector('.thread-edit-btn');
             editBtn.addEventListener('click', (e) => {
