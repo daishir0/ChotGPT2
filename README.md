@@ -1,7 +1,7 @@
 # ChotGPT2
 
 ## Overview
-ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats for context-aware conversations.
+ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, and **responsive design** for seamless cross-platform usage.
 
 ![chotgpt2](assets/chotgpt2.png)
 
@@ -60,12 +60,26 @@ ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tre
 ### Starting a New Chat
 1. Click the "New Chat" button
 2. Type your message and press Enter or click Send
+   - **PC**: Enter sends message, Shift+Enter creates new line
+   - **Mobile**: Enter creates new line, use Send button to send
 3. The AI will respond based on your selected model
+
+### Thread Management
+1. **Search Threads**: Use the 🔍 search box above the thread list
+   - Real-time incremental filtering as you type
+   - Case-insensitive search supporting multiple languages
+   - Shows search results count (e.g., "5 / 20 threads")
+   - Press **Enter** to select first result, **Escape** to clear search
+2. **Mobile Optimization**: 
+   - Touch-scroll through thread list
+   - Single-tap thread selection (no double-tap required)
+   - Responsive sidebar with smooth animations
 
 ### File Attachments
 1. Click the 📎 attachment button or "Files" button
-2. Upload files (PDF, Word, Excel, PowerPoint, Text, Markdown)
+2. Upload files (PDF, Word, Excel, PowerPoint, Text, Markdown, **CSV**)
 3. Files are automatically processed and converted to searchable content
+   - **CSV files are converted to Markdown tables** for better AI context
 4. Send messages with file context
 
 ### Conversation Tree Navigation
@@ -109,8 +123,11 @@ ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tre
 ### Troubleshooting
 - If setup fails, check PHP extensions and permissions
 - For database errors, verify SQLite support
-- If files don't upload, check file size limits and permissions
+- If files don't upload, check file size limits and permissions (CSV files up to 10MB supported)
 - Clear browser cache if interface doesn't load properly
+- **Thread deletion errors**: Ensure sessions are properly initialized
+- **Mobile scrolling issues**: Check CSS touch-action and overflow settings
+- **Search not working**: Verify JavaScript is enabled and no console errors
 
 ### Technical Requirements
 - Minimum PHP 7.4 (PHP 8+ recommended)
@@ -126,7 +143,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 # ChotGPT2
 
 ## 概要
-ChotGPT2は、高度な会話ツリー機能を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。
+ChotGPT2は、高度な会話ツリー機能を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
 
 ## インストール方法
 
@@ -180,12 +197,26 @@ ChotGPT2は、高度な会話ツリー機能を持つChatGPTクローンシス�
 ### 新しいチャットの開始
 1. 「新規チャット」ボタンをクリック
 2. メッセージを入力してEnterキーまたは送信ボタンをクリック
+   - **PC**: Enterでメッセージ送信、Shift+Enterで改行
+   - **スマホ**: Enterで改行、送信ボタンでメッセージ送信
 3. 選択したモデルに基づいてAIが応答します
+
+### スレッド管理
+1. **スレッド検索**: スレッド一覧上の🔍検索ボックスを使用
+   - 入力と同時にリアルタイムでインクリメンタルフィルタリング
+   - 大文字小文字を区別しない多言語対応検索
+   - 検索結果件数を表示（例：「5 / 20 件のスレッド」）
+   - **Enter**キーで最初の結果を選択、**Escape**キーで検索をクリア
+2. **モバイル最適化**: 
+   - スレッド一覧のタッチスクロール対応
+   - シングルタップでのスレッド選択（ダブルタップ不要）
+   - スムーズなアニメーションのレスポンシブサイドバー
 
 ### ファイル添付
 1. 📎添付ボタンまたは「ファイル」ボタンをクリック
-2. ファイルをアップロード（PDF、Word、Excel、PowerPoint、テキスト、Markdown）
+2. ファイルをアップロード（PDF、Word、Excel、PowerPoint、テキスト、Markdown、**CSV**）
 3. ファイルは自動的に処理され、検索可能なコンテンツに変換されます
+   - **CSVファイルはMarkdownテーブルに変換**され、AIがより理解しやすい形式になります
 4. ファイルコンテキスト付きでメッセージを送信
 
 ### 会話ツリーナビゲーション
@@ -229,8 +260,11 @@ ChotGPT2は、高度な会話ツリー機能を持つChatGPTクローンシス�
 ### トラブルシューティング
 - セットアップが失敗する場合は、PHP拡張と権限を確認してください
 - データベースエラーの場合は、SQLiteサポートを確認してください
-- ファイルがアップロードできない場合は、ファイルサイズ制限と権限を確認してください
+- ファイルがアップロードできない場合は、ファイルサイズ制限と権限を確認してください（CSVファイルは最大10MBまでサポート）
 - インターフェースが読み込まれない場合は、ブラウザキャッシュをクリアしてください
+- **スレッド削除エラー**: セッションが適切に初期化されていることを確認してください
+- **モバイルスクロールの問題**: CSSのtouch-actionとoverflowの設定を確認してください
+- **検索が動作しない**: JavaScriptが有効になっており、コンソールエラーがないことを確認してください
 
 ### 技術要件
 - 最低PHP 7.4（PHP 8+推奨）
