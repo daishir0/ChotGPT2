@@ -128,7 +128,7 @@ $csrfToken = $auth->generateCSRFToken();
                 <div class="modal-body">
                     <!-- Upload Area -->
                     <div class="file-upload-area">
-                        <input type="file" id="fileUpload" multiple accept=".pdf,.txt,.docx,.xlsx,.pptx,.md,.jpg,.jpeg,.png,.gif">
+                        <input type="file" id="fileUpload" multiple accept=".pdf,.txt,.docx,.xlsx,.pptx,.md,.csv,.jpg,.jpeg,.png,.gif">
                         <label for="fileUpload" class="upload-label">
                             <span class="upload-icon">📤</span>
                             <span class="upload-text">ファイルをドラッグ&ドロップ、またはクリックして選択</span>

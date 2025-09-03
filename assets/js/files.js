@@ -487,7 +487,7 @@ class FileManager {
         const ext = fileName.split('.').pop().toLowerCase();
         if (['pdf'].includes(ext)) return 'pdf';
         if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext)) return 'image';
-        if (['doc', 'docx', 'txt', 'md', 'xlsx', 'pptx'].includes(ext)) return 'document';
+        if (['doc', 'docx', 'txt', 'md', 'xlsx', 'pptx', 'csv'].includes(ext)) return 'document';
         return 'other';
     }
     

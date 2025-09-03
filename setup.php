@@ -100,7 +100,7 @@ function performInstallation($username, $password, $openai_key, $base_url) {
                 'session_timeout' => 3600,
             ],
             'upload' => [
-                'allowed_types' => ['pdf', 'txt', 'docx', 'pptx', 'xlsx', 'md'],
+                'allowed_types' => ['pdf', 'txt', 'docx', 'pptx', 'xlsx', 'md', 'csv'],
                 'max_size' => 5 * 1024 * 1024,
                 'storage_path' => $uploadsDir,
             ],

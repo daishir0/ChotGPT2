@@ -99,7 +99,7 @@ try {
 
         // アップロード設定
         'upload' => [
-            'allowed_types' => ['pdf', 'txt', 'docx', 'pptx', 'xlsx', 'md'],
+            'allowed_types' => ['pdf', 'txt', 'docx', 'pptx', 'xlsx', 'md', 'csv'],
             'max_size' => 5 * 1024 * 1024, // 5MB
             'storage_path' => $uploadsDir,
         ],

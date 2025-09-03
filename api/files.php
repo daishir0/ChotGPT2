@@ -82,10 +82,17 @@ function handleUpload($fileManager, $auth, $files, $data) {
     $fileId = $fileManager->uploadFile($files['file']);
     $file = $fileManager->getFile($fileId);
     
+    // アップロード時は軽量レスポンス（内容は含まない）
     echo json_encode([
         'success' => true,
         'file_id' => $fileId,
-        'file' => $file
+        'file' => [
+            'id' => $file['id'],
+            'original_name' => $file['original_name'],
+            'file_size' => $file['file_size'],
+            'created_at' => $file['created_at'],
+            'metadata' => json_decode($file['metadata'] ?? '{}', true)
+        ]
     ]);
 }
 

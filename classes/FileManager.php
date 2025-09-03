@@ -62,15 +62,47 @@ class FileManager {
     
     private function validateFile($fileData) {
         if ($fileData['error'] !== UPLOAD_ERR_OK) {
-            return false;
+            $this->logger->warning('File upload error', ['error_code' => $fileData['error'], 'file' => $fileData['name']]);
+            
+            // 具体的なエラーメッセージを生成
+            switch ($fileData['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                    throw new Exception('ファイルサイズがPHPの制限値(' . ini_get('upload_max_filesize') . ')を超えています');
+                case UPLOAD_ERR_FORM_SIZE:
+                    throw new Exception('ファイルサイズが制限値を超えています');
+                case UPLOAD_ERR_PARTIAL:
+                    throw new Exception('ファイルのアップロードが不完全です');
+                case UPLOAD_ERR_NO_FILE:
+                    throw new Exception('ファイルが選択されていません');
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    throw new Exception('一時ディレクトリがありません');
+                case UPLOAD_ERR_CANT_WRITE:
+                    throw new Exception('ディスクへの書き込みに失敗しました');
+                default:
+                    throw new Exception('ファイルアップロードエラー (コード: ' . $fileData['error'] . ')');
+            }
         }
         
         if ($fileData['size'] > $this->config['upload']['max_size']) {
-            return false;
+            $this->logger->warning('File too large', ['size' => $fileData['size'], 'max_size' => $this->config['upload']['max_size'], 'file' => $fileData['name']]);
+            $maxSizeMB = round($this->config['upload']['max_size'] / 1024 / 1024, 1);
+            throw new Exception("ファイルサイズが制限値({$maxSizeMB}MB)を超えています");
         }
         
         $extension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
-        return in_array($extension, $this->config['upload']['allowed_types']);
+        $allowed = in_array($extension, $this->config['upload']['allowed_types']);
+        
+        if (!$allowed) {
+            $this->logger->warning('File extension not allowed', [
+                'extension' => $extension, 
+                'file' => $fileData['name'],
+                'allowed_types' => $this->config['upload']['allowed_types']
+            ]);
+            $allowedStr = implode(', ', $this->config['upload']['allowed_types']);
+            throw new Exception("ファイル形式(.{$extension})は許可されていません。許可形式: {$allowedStr}");
+        }
+        
+        return true;
     }
     
     private function generateStoredName($originalName) {
@@ -97,6 +129,9 @@ class FileManager {
                 
             case 'pptx':
                 return $this->convertPptxToMarkdown($filePath);
+                
+            case 'csv':
+                return $this->convertCsvToMarkdown($filePath);
                 
             default:
                 return "# " . $originalName . "\n\nUnsupported file format for text extraction.";
@@ -175,6 +210,43 @@ class FileManager {
         }
         
         return "# Excel Spreadsheet\n\nSpreadsheet parsing not available. Install phpoffice/phpspreadsheet for XLSX support.";
+    }
+    
+    private function convertCsvToMarkdown($filePath) {
+        $content = "# CSV Data\n\n";
+        
+        if (($handle = fopen($filePath, 'r')) !== false) {
+            $isFirstRow = true;
+            $headers = [];
+            
+            while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+                if ($isFirstRow) {
+                    // First row as headers
+                    $headers = $data;
+                    // BOM除去
+                    if (!empty($headers[0])) {
+                        $headers[0] = ltrim($headers[0], "\xEF\xBB\xBF");
+                    }
+                    $content .= "| " . implode(" | ", array_map(function($h) { 
+                        return trim(str_replace(["|", "\n", "\r"], ["\\|", " ", " "], $h)); 
+                    }, $headers)) . " |\n";
+                    $content .= "|" . str_repeat(" --- |", count($headers)) . "\n";
+                    $isFirstRow = false;
+                } else {
+                    // Data rows - データをサニタイズ
+                    $sanitizedData = array_map(function($cell) {
+                        return trim(str_replace(["|", "\n", "\r"], ["\\|", " ", " "], $cell));
+                    }, $data);
+                    $content .= "| " . implode(" | ", $sanitizedData) . " |\n";
+                }
+            }
+            
+            fclose($handle);
+        } else {
+            $content .= "CSV file could not be read.";
+        }
+        
+        return $content;
     }
     
     private function convertPptxToMarkdown($filePath) {
