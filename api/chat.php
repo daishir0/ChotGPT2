@@ -162,10 +162,14 @@ function handleGetHistory($chatManager, $threadId) {
     $tree = $chatManager->getMessageTree($threadId);
     $thread = $chatManager->getThread($threadId);
     
+    // UTF-8エンコーディング修正
+    $cleanThread = cleanUtf8Data($thread);
+    $cleanTree = cleanUtf8Data($tree);
+    
     echo json_encode([
         'success' => true,
-        'thread' => $thread,
-        'tree' => $tree
+        'thread' => $cleanThread,
+        'tree' => $cleanTree
     ]);
 }
 
@@ -358,4 +362,17 @@ function handleCreateBranch($chatManager, $auth, $data, $logger) {
         'user_message_id' => $branchMessageId,
         'ai_response' => $aiResponse
     ]);
+}
+
+function cleanUtf8Data($data) {
+    if (is_array($data)) {
+        return array_map('cleanUtf8Data', $data);
+    } elseif (is_string($data)) {
+        // 不正なUTF-8文字を削除・修正
+        $data = mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+        // 制御文字を除去
+        $data = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $data);
+        return $data;
+    }
+    return $data;
 }

@@ -207,6 +207,7 @@ class ChotGPTApp {
     
     selectThread(threadId, threadName) {
         this.currentThread = threadId;
+        this.currentMessageId = null; // Reset message ID when switching threads
         
         // Close mobile menu if open
         if (window.innerWidth <= 768) {
@@ -227,21 +228,32 @@ class ChotGPTApp {
         if (!this.currentThread) return;
         
         try {
+            console.log('Loading messages for thread:', this.currentThread);
             const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=history&thread_id=${this.currentThread}`);
+            console.log('Response status:', response.status);
+            
             const data = await response.json();
+            console.log('Response data:', data);
             
             if (data.success) {
+                console.log('Processing tree data...');
                 // Get the path for current message instead of rendering entire tree
                 const messagePath = this.getMessagePath(data.tree);
+                console.log('Message path:', messagePath);
+                
                 this.renderMessagePath(messagePath);
                 
                 // Set currentMessageId to the last message in the displayed path
                 if (messagePath && messagePath.length > 0) {
                     this.currentMessageId = messagePath[messagePath.length - 1].id;
+                    console.log('Set currentMessageId to:', this.currentMessageId);
                 }
+            } else {
+                console.error('Data success is false:', data);
             }
         } catch (error) {
             console.error('Failed to load messages:', error);
+            console.error('Error details:', error.stack);
         }
     }
     
