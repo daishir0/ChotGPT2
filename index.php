@@ -85,6 +85,7 @@ $csrfToken = $auth->generateCSRFToken();
                     </div>
                 </div>
                 <div class="chat-actions">
+                    <button class="persona-btn" id="personaBtn" title="スレッドペルソナ設定">🎭</button>
                     <button class="tree-toggle-btn" id="treeToggleBtn">🌳 ツリー表示</button>
                 </div>
             </header>
@@ -264,6 +265,56 @@ $csrfToken = $auth->generateCSRFToken();
                 <div class="modal-footer">
                     <button class="btn-secondary" id="branchMessageCancel">キャンセル</button>
                     <button class="btn-primary" id="branchMessageSave">分岐作成</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thread Persona Modal -->
+        <div class="modal" id="threadPersonaModal" style="display: none;">
+            <div class="modal-content persona-modal">
+                <div class="modal-header">
+                    <div class="modal-title-group">
+                        <span class="persona-icon">🎭</span>
+                        <h3>AIペルソナ設定</h3>
+                    </div>
+                    <button class="modal-close" id="threadPersonaClose">×</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="persona-editor">
+                        <div class="persona-input-section">
+                            <textarea 
+                                id="threadPersonaTextarea" 
+                                class="persona-textarea"
+                                placeholder="このスレッド専用のAIキャラクターを設定してください...
+
+例：
+• あなたは経験豊富なプログラミング講師です
+• コード例を積極的に示し、丁寧に説明してください
+• 初心者にもわかりやすく教えることを心がけてください"
+                                rows="8"></textarea>
+                        </div>
+                        
+                        <div class="persona-meta">
+                            <div class="character-count">
+                                <span id="personaCharCount">0</span><span class="count-limit">/1000</span>
+                            </div>
+                            <div class="persona-hint">
+                                💡 基本システムプロンプトに追加適用されます
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-text" id="threadPersonaClear">リセット</button>
+                    <div class="action-buttons">
+                        <button class="btn-secondary" id="threadPersonaCancel">キャンセル</button>
+                        <button class="btn-primary" id="threadPersonaSave">
+                            <span class="btn-icon">✓</span>
+                            保存
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

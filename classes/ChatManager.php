@@ -43,6 +43,22 @@ class ChatManager {
         $this->logger->info('Thread deleted', ['thread_id' => $threadId]);
     }
     
+    public function updateThreadSystemPrompt($threadId, $systemPrompt) {
+        $sql = "UPDATE threads SET thread_system_prompt = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        $this->db->query($sql, [$systemPrompt, $threadId]);
+        
+        $this->logger->info('Thread system prompt updated', [
+            'thread_id' => $threadId, 
+            'prompt_length' => strlen($systemPrompt)
+        ]);
+    }
+    
+    public function getThreadSystemPrompt($threadId) {
+        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ?";
+        $result = $this->db->fetchOne($sql, [$threadId]);
+        return $result ? $result['thread_system_prompt'] : '';
+    }
+    
     public function addMessage($threadId, $role, $content, $parentMessageId = null, $isContext = true) {
         $sql = "INSERT INTO messages (thread_id, parent_message_id, content, role, is_context) 
                 VALUES (?, ?, ?, ?, ?)";

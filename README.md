@@ -1,7 +1,16 @@
 # ChotGPT2
 
 ## Overview
-ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, and **responsive design** for seamless cross-platform usage.
+ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, and **responsive design** for seamless cross-platform usage.
+
+### 🚀 BREAKTHROUGH INNOVATION: Thread-Specific AI Personas
+**ChotGPT2 introduces the world's first thread-specific AI persona system** - a revolutionary feature that no other AI chat application offers:
+- **Unique AI personalities per conversation thread** - Create specialized experts, creative writers, technical advisors, or any character you need
+- **Context-aware personality switching** - The AI automatically adapts its behavior based on the active thread
+- **Persistent persona memory** - Each thread maintains its unique character across sessions
+- **Global + thread prompt combination** - Unprecedented flexibility in AI behavior customization
+
+This groundbreaking innovation transforms AI chat from one-size-fits-all to truly personalized, context-aware interactions.
 
 ![chotgpt2](assets/chotgpt2.png)
 
@@ -143,7 +152,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 # ChotGPT2
 
 ## 概要
-ChotGPT2は、高度な会話ツリー機能を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
+ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
+
+### 🚀 画期的イノベーション：スレッド固有AIペルソナ
+**ChotGPT2は世界初のスレッド固有AIペルソナシステムを導入** - 他のAIチャットアプリケーションにはない革新的機能：
+- **会話スレッドごとの独自AIパーソナリティ** - 専門家、創作作家、技術顧問など必要なキャラクターを創造
+- **コンテキスト対応パーソナリティ切り替え** - アクティブなスレッドに基づいてAIが自動的に行動を適応
+- **永続的ペルソナメモリ** - 各スレッドがセッション間で独自のキャラクターを維持
+- **グローバル＋スレッドプロンプト組み合わせ** - AI行動カスタマイゼーションの前例のない柔軟性
+
+この画期的なイノベーションは、AIチャットを万能型から真にパーソナライズされたコンテキスト対応のインタラクションに変革します。
 
 ## インストール方法
 

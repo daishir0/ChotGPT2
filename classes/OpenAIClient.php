@@ -11,17 +11,32 @@ class OpenAIClient {
         $this->logger = $logger;
     }
     
-    public function sendMessage($messages, $model = null, $systemPrompt = null) {
+    public function sendMessage($messages, $model = null, $systemPrompt = null, $threadSystemPrompt = null) {
         if (!$model) {
             $model = $this->config['openai']['default_model'];
         }
         
         $formattedMessages = [];
         
+        // Combine system prompts
+        $finalSystemPrompt = '';
+        
         if ($systemPrompt) {
+            $finalSystemPrompt .= $systemPrompt;
+        }
+        
+        if ($threadSystemPrompt) {
+            if ($finalSystemPrompt) {
+                $finalSystemPrompt .= "\n\n" . $threadSystemPrompt;
+            } else {
+                $finalSystemPrompt = $threadSystemPrompt;
+            }
+        }
+        
+        if ($finalSystemPrompt) {
             $formattedMessages[] = [
                 'role' => 'system',
-                'content' => $systemPrompt
+                'content' => $finalSystemPrompt
             ];
         }
         

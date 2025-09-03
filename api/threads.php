@@ -94,6 +94,15 @@ try {
             handleGetTree($chatManager, $_GET);
             break;
             
+        case 'get_persona':
+            handleGetPersona($chatManager, $_GET);
+            break;
+            
+        case 'set_persona':
+            $input = json_decode(file_get_contents('php://input'), true);
+            handleSetPersona($chatManager, $auth, $input);
+            break;
+            
         default:
             throw new Exception('Invalid action');
     }
@@ -217,5 +226,45 @@ function handleGetTree($chatManager, $params) {
     echo json_encode([
         'success' => true,
         'tree' => $tree
+    ]);
+}
+
+function handleGetPersona($chatManager, $params) {
+    $threadId = $params['thread_id'] ?? null;
+    
+    if (!$threadId) {
+        throw new Exception('Thread ID required');
+    }
+    
+    $systemPrompt = $chatManager->getThreadSystemPrompt($threadId);
+    
+    echo json_encode([
+        'success' => true,
+        'thread_system_prompt' => $systemPrompt
+    ]);
+}
+
+function handleSetPersona($chatManager, $auth, $data) {
+    if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
+        throw new Exception('Invalid CSRF token');
+    }
+    
+    $threadId = $data['thread_id'] ?? null;
+    $systemPrompt = $auth->sanitizeInput($data['thread_system_prompt'] ?? '');
+    
+    if (!$threadId) {
+        throw new Exception('Thread ID required');
+    }
+    
+    // Validate system prompt length
+    if (strlen($systemPrompt) > 10000) {
+        throw new Exception('Thread system prompt is too long (max 10000 characters)');
+    }
+    
+    $chatManager->updateThreadSystemPrompt($threadId, $systemPrompt);
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Thread system prompt updated successfully'
     ]);
 }

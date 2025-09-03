@@ -135,7 +135,10 @@ function handleSendMessage($chatManager, $openaiClient, $fileManager, $auth, $lo
     
     $compressedContext = $openaiClient->compressContext($contextMessages);
     
-    $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt);
+    // Get thread system prompt
+    $threadSystemPrompt = $chatManager->getThreadSystemPrompt($threadId);
+    
+    $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt, $threadSystemPrompt);
     
     $assistantMessageId = $chatManager->addMessage(
         $threadId, 
@@ -248,8 +251,12 @@ function generateAIResponse($chatManager, $userMessageId, $systemPrompt, $model,
         // Compress context if needed
         $compressedContext = $openaiClient->compressContext($contextMessages);
         
+        // Get thread system prompt
+        $threadId = $chatManager->getMessage($userMessageId)['thread_id'];
+        $threadSystemPrompt = $chatManager->getThreadSystemPrompt($threadId);
+        
         // Send to OpenAI
-        $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt);
+        $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt, $threadSystemPrompt);
         
         // Save AI response as child of the edited message
         $assistantMessageId = $chatManager->addMessage(

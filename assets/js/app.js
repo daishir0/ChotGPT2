@@ -89,6 +89,32 @@ class ChotGPTApp {
             this.toggleTreeView();
         });
         
+        // Thread Persona
+        document.getElementById('personaBtn').addEventListener('click', () => {
+            this.showThreadPersona();
+        });
+        
+        document.getElementById('threadPersonaClose').addEventListener('click', () => {
+            this.hideModal('threadPersonaModal');
+        });
+        
+        document.getElementById('threadPersonaCancel').addEventListener('click', () => {
+            this.hideModal('threadPersonaModal');
+        });
+        
+        document.getElementById('threadPersonaSave').addEventListener('click', () => {
+            this.saveThreadPersona();
+        });
+        
+        document.getElementById('threadPersonaClear').addEventListener('click', () => {
+            this.clearThreadPersona();
+        });
+        
+        // Character count for persona textarea
+        document.getElementById('threadPersonaTextarea').addEventListener('input', (e) => {
+            this.updatePersonaCharCount(e.target.value);
+        });
+        
         // Mobile Menu
         document.getElementById('mobileMenuBtn').addEventListener('click', () => {
             this.toggleMobileMenu();
@@ -335,6 +361,7 @@ class ChotGPTApp {
         
         this.loadMessages();
         this.loadTree();
+        this.loadThreadPersonaState();
     }
     
     async loadMessages() {
@@ -957,6 +984,157 @@ class ChotGPTApp {
             console.error('Settings save error:', error);
             alert('設定の保存中にエラーが発生しました。サーバーに接続できません。');
             throw error; // Re-throw to prevent silent failures
+        }
+    }
+    
+    async showThreadPersona() {
+        if (!this.currentThread) {
+            alert('スレッドを選択してください');
+            return;
+        }
+        
+        try {
+            // Load current thread persona
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php?action=get_persona&thread_id=${this.currentThread}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update modal content
+                document.getElementById('threadPersonaTextarea').value = data.thread_system_prompt || '';
+                this.updatePersonaCharCount(data.thread_system_prompt || '');
+                this.updatePersonaButtonState(data.thread_system_prompt || '');
+                this.showModal('threadPersonaModal');
+            } else {
+                throw new Error(data.error || 'Failed to load thread persona');
+            }
+        } catch (error) {
+            console.error('Thread persona load error:', error);
+            alert('ペルソナ設定の読み込みに失敗しました');
+        }
+    }
+    
+    async saveThreadPersona() {
+        if (!this.currentThread) {
+            alert('スレッドが選択されていません');
+            return;
+        }
+        
+        const persona = document.getElementById('threadPersonaTextarea').value.trim();
+        
+        if (persona.length > 1000) {
+            alert('ペルソナは1000文字以内で入力してください');
+            return;
+        }
+        
+        try {
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php?action=set_persona`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    thread_id: this.currentThread,
+                    thread_system_prompt: persona,
+                    csrf_token: window.csrfToken
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                this.hideModal('threadPersonaModal');
+                this.updatePersonaButtonState(persona);
+                
+                // Show notification for future messages
+                if (persona) {
+                    this.showNotification('ペルソナが設定されました。新しいメッセージから適用されます。');
+                } else {
+                    this.showNotification('ペルソナがクリアされました。');
+                }
+            } else {
+                throw new Error(data.error || 'Failed to save thread persona');
+            }
+        } catch (error) {
+            console.error('Thread persona save error:', error);
+            alert('ペルソナの保存に失敗しました');
+        }
+    }
+    
+    clearThreadPersona() {
+        if (confirm('スレッドペルソナを削除しますか？')) {
+            document.getElementById('threadPersonaTextarea').value = '';
+            this.updatePersonaCharCount('');
+        }
+    }
+    
+    updatePersonaCharCount(text) {
+        const count = text.length;
+        document.getElementById('personaCharCount').textContent = count;
+        
+        // Change color based on limit
+        const countElement = document.getElementById('personaCharCount');
+        if (count > 1000) {
+            countElement.style.color = 'var(--error-color, #ff4444)';
+        } else if (count > 800) {
+            countElement.style.color = 'var(--warning-color, #ffaa00)';
+        } else {
+            countElement.style.color = '';
+        }
+    }
+    
+    updatePersonaButtonState(persona) {
+        const personaBtn = document.getElementById('personaBtn');
+        if (persona && persona.trim()) {
+            personaBtn.classList.add('active');
+            personaBtn.title = 'スレッドペルソナ設定済み';
+        } else {
+            personaBtn.classList.remove('active');
+            personaBtn.title = 'スレッドペルソナ設定';
+        }
+    }
+    
+    showNotification(message) {
+        // Simple notification - can be enhanced later
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color, #007bff);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+    
+    async loadThreadPersonaState() {
+        if (!this.currentThread) {
+            this.updatePersonaButtonState('');
+            return;
+        }
+        
+        try {
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php?action=get_persona&thread_id=${this.currentThread}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updatePersonaButtonState(data.thread_system_prompt || '');
+            }
+        } catch (error) {
+            console.error('Failed to load thread persona state:', error);
+            this.updatePersonaButtonState('');
         }
     }
     
