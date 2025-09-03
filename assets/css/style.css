@@ -998,3 +998,519 @@ html,
     user-select: text;
     -webkit-touch-callout: default;
 }
+
+/* Enhanced File Manager Styles */
+.file-manager-modal .modal-content {
+    max-width: 900px;
+    width: 90%;
+    max-height: 80vh;
+}
+
+.file-upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.file-upload-area:hover,
+.file-upload-area.drag-over {
+    border-color: var(--accent-color);
+    background-color: rgba(74, 158, 255, 0.1);
+}
+
+.upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.upload-icon {
+    font-size: 32px;
+}
+
+.upload-text {
+    font-size: 14px;
+}
+
+/* File Controls */
+.file-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 16px;
+}
+
+.file-search {
+    flex: 1;
+}
+
+.file-search input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.file-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.view-toggle {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.view-btn {
+    background: var(--bg-secondary);
+    border: none;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.view-btn:hover,
+.view-btn.active {
+    background: var(--accent-color);
+    color: white;
+}
+
+.sort-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+/* Filter Chips */
+.filter-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+}
+
+.chip:hover,
+.chip.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+/* Selection Toolbar */
+.selection-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--accent-color);
+    color: white;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+}
+
+.selection-count {
+    font-weight: bold;
+}
+
+.bulk-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.bulk-action-btn,
+.cancel-selection {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.bulk-action-btn:hover,
+.cancel-selection:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.bulk-action-btn.danger:hover {
+    background: var(--error-color);
+}
+
+/* File Container */
+.file-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+/* Grid View */
+.file-list.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+/* List View */
+.file-list.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* File Card (Grid View) */
+.file-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 16px;
+    background: var(--bg-secondary);
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+
+.file-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.file-card.selected {
+    border-color: var(--accent-color);
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.file-card .file-icon {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.file-card .file-info {
+    text-align: center;
+}
+
+.file-card .file-name {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+.file-card .file-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: block;
+}
+
+.file-card .file-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.file-card:hover .file-actions {
+    opacity: 1;
+}
+
+.file-card .action-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.file-card .action-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+.file-card .action-btn.delete:hover {
+    background: var(--error-color);
+}
+
+/* File Item (List View) */
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-secondary);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.file-item:hover {
+    border-color: var(--accent-color);
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.file-item.selected {
+    border-color: var(--accent-color);
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.file-item .file-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.file-item .file-icon {
+    font-size: 24px;
+}
+
+.file-item .file-info {
+    flex: 1;
+}
+
+.file-item .file-name {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.file-item .file-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.file-item .file-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.file-item:hover .file-actions {
+    opacity: 1;
+}
+
+.file-item .action-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.file-item .action-btn:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.file-item .action-btn.delete:hover {
+    background: var(--error-color);
+}
+
+/* Selection Checkbox */
+.file-checkbox {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.file-card.selected .file-checkbox,
+.file-card:hover .file-checkbox {
+    opacity: 1;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.empty-text {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.empty-subtext {
+    font-size: 14px;
+}
+
+/* Delete Confirmation Modal */
+.modal-content.small {
+    max-width: 400px;
+}
+
+.delete-confirm-content {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.warning-icon {
+    font-size: 32px;
+}
+
+.delete-message {
+    flex: 1;
+}
+
+.delete-file-list {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin: 12px 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.delete-file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.delete-warning {
+    color: var(--error-color);
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.btn-danger {
+    background: var(--error-color);
+    color: white;
+    border: 1px solid var(--error-color);
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .file-manager-modal .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .file-controls {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .file-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .filter-chips {
+        justify-content: center;
+    }
+    
+    .file-list.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+    
+    .selection-toolbar {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .bulk-actions {
+        justify-content: center;
+    }
+    
+    .file-container {
+        max-height: 300px;
+    }
+    
+    .upload-icon {
+        font-size: 24px;
+    }
+    
+    .upload-text {
+        font-size: 12px;
+    }
+    
+    .file-upload-area {
+        padding: 30px 15px;
+    }
+}

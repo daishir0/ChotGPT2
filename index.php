@@ -120,29 +120,101 @@ $csrfToken = $auth->generateCSRFToken();
         
         <!-- File Manager Modal -->
         <div class="modal" id="fileManagerModal" style="display: none;">
-            <div class="modal-content">
+            <div class="modal-content file-manager-modal">
                 <div class="modal-header">
                     <h3>ファイル管理</h3>
                     <button class="modal-close" id="fileManagerClose">×</button>
                 </div>
                 <div class="modal-body">
+                    <!-- Upload Area -->
                     <div class="file-upload-area">
-                        <input type="file" id="fileUpload" multiple accept=".pdf,.txt,.docx,.xlsx,.pptx,.md">
+                        <input type="file" id="fileUpload" multiple accept=".pdf,.txt,.docx,.xlsx,.pptx,.md,.jpg,.jpeg,.png,.gif">
                         <label for="fileUpload" class="upload-label">
-                            ファイルをドラッグ&ドロップ、またはクリックして選択
+                            <span class="upload-icon">📤</span>
+                            <span class="upload-text">ファイルをドラッグ&ドロップ、またはクリックして選択</span>
                         </label>
                     </div>
                     
-                    <div class="file-search">
-                        <input type="text" id="fileSearch" placeholder="ファイルを検索...">
+                    <!-- Controls -->
+                    <div class="file-controls">
+                        <div class="file-search">
+                            <input type="text" id="fileSearch" placeholder="🔍 ファイルを検索...">
+                        </div>
+                        
+                        <div class="file-actions">
+                            <div class="view-toggle">
+                                <button class="view-btn active" id="gridViewBtn" data-view="grid" title="グリッド表示">⚏</button>
+                                <button class="view-btn" id="listViewBtn" data-view="list" title="リスト表示">☰</button>
+                            </div>
+                            
+                            <select class="sort-select" id="sortSelect">
+                                <option value="name">名前順</option>
+                                <option value="date">日付順</option>
+                                <option value="size">サイズ順</option>
+                                <option value="type">タイプ順</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="file-list" id="fileList">
-                        <!-- ファイル一覧 -->
+                    <!-- Filter Chips -->
+                    <div class="filter-chips">
+                        <span class="chip active" data-type="all">すべて</span>
+                        <span class="chip" data-type="pdf">PDF</span>
+                        <span class="chip" data-type="image">画像</span>
+                        <span class="chip" data-type="document">文書</span>
+                        <span class="chip" data-type="other">その他</span>
+                    </div>
+                    
+                    <!-- Selection Toolbar -->
+                    <div class="selection-toolbar" id="selectionToolbar" style="display: none;">
+                        <span class="selection-count" id="selectionCount">0個選択中</span>
+                        <div class="bulk-actions">
+                            <button class="bulk-action-btn" id="bulkDownloadBtn">📥 ダウンロード</button>
+                            <button class="bulk-action-btn danger" id="bulkDeleteBtn">🗑️ 削除</button>
+                            <button class="cancel-selection" id="cancelSelectionBtn">キャンセル</button>
+                        </div>
+                    </div>
+                    
+                    <!-- File List Container -->
+                    <div class="file-container">
+                        <div class="file-list grid-view" id="fileList">
+                            <!-- ファイル一覧がここに動的生成される -->
+                        </div>
+                        
+                        <div class="empty-state" id="emptyState" style="display: none;">
+                            <div class="empty-icon">📁</div>
+                            <div class="empty-text">ファイルがありません</div>
+                            <div class="empty-subtext">上記のエリアからファイルをアップロードしてください</div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button class="btn-secondary" id="clearSelectionBtn">選択解除</button>
                     <button class="btn-primary" id="selectFilesBtn">選択したファイルを添付</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="deleteConfirmModal" style="display: none;">
+            <div class="modal-content small">
+                <div class="modal-header">
+                    <h3>ファイル削除</h3>
+                    <button class="modal-close" id="deleteConfirmClose">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-confirm-content">
+                        <div class="warning-icon">⚠️</div>
+                        <div class="delete-message">
+                            <p>以下のファイルを削除しますか？</p>
+                            <div class="delete-file-list" id="deleteFileList"></div>
+                            <p class="delete-warning">この操作は取り消せません。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="deleteConfirmCancel">キャンセル</button>
+                    <button class="btn-danger" id="deleteConfirmOk">削除する</button>
                 </div>
             </div>
         </div>
