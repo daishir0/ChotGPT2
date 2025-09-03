@@ -132,10 +132,6 @@ class ChotGPTApp {
             }
         });
         
-        // File Manager
-        document.getElementById('fileManagerBtn').addEventListener('click', () => {
-            window.fileManager.show();
-        });
         
         document.getElementById('attachFileBtn').addEventListener('click', () => {
             window.fileManager.show();

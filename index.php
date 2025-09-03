@@ -61,7 +61,6 @@ $csrfToken = $auth->generateCSRFToken();
             </div>
             
             <div class="sidebar-footer">
-                <button class="file-manager-btn sidebar-file-btn" id="fileManagerBtn">📁 ファイル</button>
                 <button class="settings-btn" id="settingsBtn">⚙️ 設定</button>
             </div>
         </aside>
