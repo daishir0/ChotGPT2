@@ -370,7 +370,7 @@ body {
     color: var(--text-primary);
     resize: none;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
     max-height: 200px;
 }
@@ -523,6 +523,7 @@ body {
     border-radius: var(--radius);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
+    font-size: 16px;
 }
 
 .file-list {
@@ -601,6 +602,7 @@ body {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     font-family: inherit;
+    font-size: 16px;
 }
 
 .radio-group {
