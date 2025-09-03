@@ -55,9 +55,12 @@ class TreeViewer {
             <span class="tree-time">(${timestamp})</span>
         `;
         
-        nodeDiv.addEventListener('click', () => {
-            this.selectNode(node.id);
-        });
+        // Only add click event for user messages
+        if (node.role === 'user') {
+            nodeDiv.addEventListener('click', () => {
+                this.selectNode(node.id);
+            });
+        }
         
         return nodeDiv;
     }
@@ -106,12 +109,6 @@ class TreeViewer {
                 behavior: 'smooth', 
                 block: 'center' 
             });
-            
-            // Highlight the message temporarily
-            messageElement.style.background = 'rgba(74, 158, 255, 0.2)';
-            setTimeout(() => {
-                messageElement.style.background = '';
-            }, 2000);
         }
     }
     

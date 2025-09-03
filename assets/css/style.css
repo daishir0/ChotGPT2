@@ -335,9 +335,17 @@ body {
     background-color: var(--bg-tertiary);
 }
 
+.tree-node.assistant {
+    cursor: default;
+}
+
+.tree-node.assistant:hover {
+    background-color: transparent;
+}
+
 .tree-node.current {
-    background-color: var(--accent-color);
-    color: white;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .tree-node.user {
