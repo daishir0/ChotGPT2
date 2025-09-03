@@ -84,6 +84,30 @@ class ChotGPTApp {
             this.closeMobileMenu();
         });
         
+        // Edit Message Modal
+        document.getElementById('editMessageClose').addEventListener('click', () => {
+            this.hideModal('editMessageModal');
+        });
+        
+        document.getElementById('editMessageCancel').addEventListener('click', () => {
+            this.hideModal('editMessageModal');
+        });
+        
+        document.getElementById('editMessageSave').addEventListener('click', () => {
+            this.saveEditedMessage();
+        });
+        
+        // Edit message textarea keyboard shortcuts
+        document.getElementById('editMessageTextarea').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                this.saveEditedMessage();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this.hideModal('editMessageModal');
+            }
+        });
+        
         // File Manager
         document.getElementById('fileManagerBtn').addEventListener('click', () => {
             window.fileManager.show();
@@ -329,29 +353,91 @@ class ChotGPTApp {
     }
     
     async editMessage(messageId) {
-        // Implementation for message editing
-        const newContent = prompt('メッセージを編集してください:');
-        if (newContent !== null && newContent.trim()) {
-            try {
-                const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=edit`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message_id: messageId,
-                        content: newContent,
-                        csrf_token: window.csrfToken
-                    })
-                });
+        // Get current message content
+        try {
+            const message = await this.getMessage(messageId);
+            if (message) {
+                this.currentEditMessageId = messageId;
+                document.getElementById('editMessageTextarea').value = message.content;
+                this.showModal('editMessageModal');
                 
-                const data = await response.json();
-                if (data.success) {
-                    this.loadMessages();
-                }
-            } catch (error) {
-                console.error('Edit message error:', error);
+                // Focus on textarea after modal is shown
+                setTimeout(() => {
+                    const textarea = document.getElementById('editMessageTextarea');
+                    textarea.focus();
+                    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+                }, 100);
             }
+        } catch (error) {
+            console.error('Get message error:', error);
+            alert('メッセージの取得に失敗しました');
+        }
+    }
+    
+    async getMessage(messageId) {
+        // Helper method to get message by ID
+        const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=get&message_id=${messageId}`);
+        const data = await response.json();
+        return data.success ? data.message : null;
+    }
+    
+    async saveEditedMessage() {
+        const newContent = document.getElementById('editMessageTextarea').value.trim();
+        
+        if (!newContent) {
+            alert('メッセージ内容を入力してください');
+            return;
+        }
+        
+        if (!this.currentEditMessageId) {
+            alert('エラー: 編集対象のメッセージが見つかりません');
+            return;
+        }
+        
+        // Show loading spinner
+        document.getElementById('loadingSpinner').style.display = 'flex';
+        
+        try {
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=edit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message_id: this.currentEditMessageId,
+                    content: newContent,
+                    system_prompt: this.settings.systemPrompt,
+                    model: this.settings.model,
+                    csrf_token: window.csrfToken
+                })
+            });
+            
+            const data = await response.json();
+            console.log('Edit message response:', data);
+            
+            if (data.success) {
+                this.hideModal('editMessageModal');
+                
+                // Check if AI response generation was successful
+                if (data.ai_response && data.ai_response.error) {
+                    alert('メッセージは更新されましたが、AI応答の生成に失敗しました: ' + data.ai_response.error);
+                } else if (data.ai_response) {
+                    console.log('AI response generated:', data.ai_response);
+                }
+                
+                // Reload messages and tree
+                this.loadMessages();
+                this.loadTree();
+                this.currentEditMessageId = null;
+            } else {
+                alert('メッセージの更新に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+            }
+        } catch (error) {
+            console.error('Edit message error:', error);
+            alert('メッセージの更新中にエラーが発生しました');
+        } finally {
+            // Hide loading spinner
+            document.getElementById('loadingSpinner').style.display = 'none';
         }
     }
     

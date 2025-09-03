@@ -148,6 +148,26 @@ $csrfToken = $auth->generateCSRFToken();
             </div>
         </div>
         
+        <!-- Edit Message Modal -->
+        <div class="modal" id="editMessageModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>メッセージを編集</h3>
+                    <button class="modal-close" id="editMessageClose">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="edit-message-form">
+                        <label for="editMessageTextarea">メッセージ内容:</label>
+                        <textarea id="editMessageTextarea" rows="6" placeholder="メッセージを編集してください..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="editMessageCancel">キャンセル</button>
+                    <button class="btn-primary" id="editMessageSave">保存</button>
+                </div>
+            </div>
+        </div>
+        
         <!-- Settings Modal -->
         <div class="modal" id="settingsModal" style="display: none;">
             <div class="modal-content">

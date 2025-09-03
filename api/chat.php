@@ -52,20 +52,28 @@ try {
             handleGetHistory($chatManager, $_GET['thread_id'] ?? null);
             break;
             
+        case 'get':
+            handleGetMessage($chatManager, $_GET['message_id'] ?? null);
+            break;
+            
         case 'edit':
-            handleEditMessage($chatManager, $auth, $_POST, $logger);
+            $input = json_decode(file_get_contents('php://input'), true);
+            handleEditMessage($chatManager, $auth, $input, $logger);
             break;
             
         case 'delete':
-            handleDeleteMessage($chatManager, $auth, $_POST);
+            $input = json_decode(file_get_contents('php://input'), true);
+            handleDeleteMessage($chatManager, $auth, $input);
             break;
             
         case 'context':
-            handleUpdateContext($chatManager, $auth, $_POST);
+            $input = json_decode(file_get_contents('php://input'), true);
+            handleUpdateContext($chatManager, $auth, $input);
             break;
             
         case 'branch':
-            handleCreateBranch($chatManager, $auth, $_POST);
+            $input = json_decode(file_get_contents('php://input'), true);
+            handleCreateBranch($chatManager, $auth, $input);
             break;
             
         default:
@@ -161,6 +169,23 @@ function handleGetHistory($chatManager, $threadId) {
     ]);
 }
 
+function handleGetMessage($chatManager, $messageId) {
+    if (!$messageId) {
+        throw new Exception('Message ID required');
+    }
+    
+    $message = $chatManager->getMessage($messageId);
+    
+    if (!$message) {
+        throw new Exception('Message not found');
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'message' => $message
+    ]);
+}
+
 function handleEditMessage($chatManager, $auth, $data, $logger) {
     if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
         throw new Exception('Invalid CSRF token');
@@ -168,14 +193,91 @@ function handleEditMessage($chatManager, $auth, $data, $logger) {
     
     $messageId = $data['message_id'] ?? null;
     $newContent = $auth->sanitizeInput($data['content'] ?? '');
+    $systemPrompt = $data['system_prompt'] ?? null;
+    $model = $data['model'] ?? null;
     
     if (!$messageId || empty($newContent)) {
         throw new Exception('Message ID and content required');
     }
     
+    // Get the original message to check if it's a user message
+    $originalMessage = $chatManager->getMessage($messageId);
+    if (!$originalMessage) {
+        throw new Exception('Message not found');
+    }
+    
+    if ($originalMessage['role'] !== 'user') {
+        throw new Exception('Only user messages can be edited');
+    }
+    
+    // Update the message content
     $chatManager->updateMessage($messageId, $newContent);
     
-    echo json_encode(['success' => true]);
+    // Delete all child messages (AI responses)
+    $deletedCount = $chatManager->deleteChildMessages($messageId);
+    
+    $logger->info('Message edited and child messages deleted', [
+        'message_id' => $messageId,
+        'deleted_children' => $deletedCount
+    ]);
+    
+    // Generate new AI response
+    $response = generateAIResponse($chatManager, $messageId, $systemPrompt, $model, $logger);
+    
+    echo json_encode([
+        'success' => true,
+        'deleted_children' => $deletedCount,
+        'ai_response' => $response
+    ]);
+}
+
+function generateAIResponse($chatManager, $userMessageId, $systemPrompt, $model, $logger) {
+    global $config;
+    
+    try {
+        // Get OpenAI client
+        $openaiClient = new OpenAIClient($config, $logger);
+        
+        // Get context messages for the edited message
+        $contextMessages = $chatManager->getContextMessages($userMessageId);
+        
+        // Compress context if needed
+        $compressedContext = $openaiClient->compressContext($contextMessages);
+        
+        // Send to OpenAI
+        $response = $openaiClient->sendMessage($compressedContext, $model, $systemPrompt);
+        
+        // Save AI response as child of the edited message
+        $assistantMessageId = $chatManager->addMessage(
+            $chatManager->getMessage($userMessageId)['thread_id'], 
+            'assistant',
+            $response['content'], 
+            $userMessageId
+        );
+        
+        $logger->info('AI response generated for edited message', [
+            'user_message_id' => $userMessageId,
+            'assistant_message_id' => $assistantMessageId,
+            'tokens_used' => $response['usage']['total_tokens'] ?? 0
+        ]);
+        
+        return [
+            'message_id' => $assistantMessageId,
+            'content' => $response['content'],
+            'usage' => $response['usage']
+        ];
+        
+    } catch (Exception $e) {
+        $logger->error('AI response generation failed', [
+            'user_message_id' => $userMessageId,
+            'error' => $e->getMessage()
+        ]);
+        
+        // Return error but don't fail the entire edit operation
+        return [
+            'error' => 'AI応答の生成に失敗しました: ' . $e->getMessage()
+        ];
+    }
 }
 
 function handleDeleteMessage($chatManager, $auth, $data) {

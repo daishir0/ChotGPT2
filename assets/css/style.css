@@ -740,6 +740,43 @@ body {
     margin-bottom: 0;
 }
 
+/* Edit Message Modal */
+.edit-message-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edit-message-form label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.edit-message-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.4;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+}
+
+.edit-message-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.edit-message-form textarea::placeholder {
+    color: var(--text-muted);
+}
+
 /* Buttons */
 .btn-primary {
     padding: 12px 24px;

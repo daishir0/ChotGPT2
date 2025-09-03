@@ -162,4 +162,36 @@ class ChatManager {
         
         $this->logger->info('Message deleted', ['message_id' => $messageId]);
     }
+    
+    public function deleteChildMessages($messageId) {
+        // Get all child messages recursively
+        $childIds = $this->getChildMessageIds($messageId);
+        
+        if (!empty($childIds)) {
+            $placeholders = str_repeat('?,', count($childIds) - 1) . '?';
+            $sql = "DELETE FROM messages WHERE id IN ($placeholders)";
+            $this->db->query($sql, $childIds);
+            
+            $this->logger->info('Child messages deleted', [
+                'parent_message_id' => $messageId,
+                'deleted_count' => count($childIds),
+                'deleted_ids' => $childIds
+            ]);
+        }
+        
+        return count($childIds);
+    }
+    
+    private function getChildMessageIds($messageId, &$childIds = []) {
+        $sql = "SELECT id FROM messages WHERE parent_message_id = ?";
+        $children = $this->db->fetchAll($sql, [$messageId]);
+        
+        foreach ($children as $child) {
+            $childIds[] = $child['id'];
+            // Recursively get grandchildren
+            $this->getChildMessageIds($child['id'], $childIds);
+        }
+        
+        return $childIds;
+    }
 }
