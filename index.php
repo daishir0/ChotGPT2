@@ -44,8 +44,11 @@ $csrfToken = $auth->generateCSRFToken();
 </head>
 <body class="dark-theme">
     <div class="app-container">
+        <!-- Mobile Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h1 class="logo">ChotGPT</h1>
                 <button class="new-chat-btn" id="newChatBtn">
@@ -66,8 +69,11 @@ $csrfToken = $auth->generateCSRFToken();
         <main class="main-content">
             <!-- Chat Header -->
             <header class="chat-header">
-                <div class="thread-info">
-                    <h2 id="currentThreadName">チャットを選択してください</h2>
+                <div class="header-left">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+                    <div class="thread-info">
+                        <h2 id="currentThreadName">チャットを選択してください</h2>
+                    </div>
                 </div>
                 <div class="chat-actions">
                     <button class="tree-toggle-btn" id="treeToggleBtn">🌳 ツリー表示</button>

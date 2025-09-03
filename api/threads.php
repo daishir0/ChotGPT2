@@ -35,7 +35,7 @@ try {
     $db = Database::getInstance($config);
     $chatManager = new ChatManager($db, $logger);
     
-    $action = $_GET['action'] ?? '';
+    $action = $_GET['action'] ?? $_POST['action'] ?? '';
     
     switch ($action) {
         case 'list':
@@ -48,6 +48,10 @@ try {
             
         case 'get':
             handleGet($chatManager, $_GET);
+            break;
+            
+        case 'update':
+            handleUpdate($chatManager, $auth, $_POST);
             break;
             
         case 'delete':
@@ -111,6 +115,31 @@ function handleGet($chatManager, $params) {
     if (!$thread) {
         throw new Exception('Thread not found');
     }
+    
+    echo json_encode([
+        'success' => true,
+        'thread' => $thread
+    ]);
+}
+
+function handleUpdate($chatManager, $auth, $data) {
+    if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
+        throw new Exception('Invalid CSRF token');
+    }
+    
+    $threadId = $data['thread_id'] ?? null;
+    $name = $auth->sanitizeInput($data['name'] ?? '');
+    
+    if (!$threadId) {
+        throw new Exception('Thread ID required');
+    }
+    
+    if (empty($name)) {
+        throw new Exception('Thread name required');
+    }
+    
+    $chatManager->updateThreadName($threadId, $name);
+    $thread = $chatManager->getThread($threadId);
     
     echo json_encode([
         'success' => true,

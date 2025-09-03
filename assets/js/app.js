@@ -74,6 +74,16 @@ class ChotGPTApp {
             this.toggleTreeView();
         });
         
+        // Mobile Menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            this.toggleMobileMenu();
+        });
+        
+        // Sidebar Overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', () => {
+            this.closeMobileMenu();
+        });
+        
         // File Manager
         document.getElementById('fileManagerBtn').addEventListener('click', () => {
             window.fileManager.show();
@@ -111,17 +121,39 @@ class ChotGPTApp {
         threadList.innerHTML = '';
         
         threads.forEach(thread => {
-            const threadElement = document.createElement('button');
+            const threadElement = document.createElement('div');
             threadElement.className = 'thread-item';
             threadElement.dataset.threadId = thread.id;
             
             threadElement.innerHTML = `
-                <div class="thread-name">${this.escapeHtml(thread.name)}</div>
-                <div class="thread-time">${this.formatDate(thread.updated_at)}</div>
+                <div class="thread-content" data-thread-id="${thread.id}">
+                    <div class="thread-name" data-thread-name="${this.escapeHtml(thread.name)}">${this.escapeHtml(thread.name)}</div>
+                    <div class="thread-time">${this.formatDate(thread.updated_at)}</div>
+                </div>
+                <div class="thread-actions">
+                    <button class="thread-edit-btn" data-thread-id="${thread.id}" title="編集">✏️</button>
+                    <button class="thread-delete-btn" data-thread-id="${thread.id}" title="削除">🗑️</button>
+                </div>
             `;
             
-            threadElement.addEventListener('click', () => {
+            // Thread content click event
+            const threadContent = threadElement.querySelector('.thread-content');
+            threadContent.addEventListener('click', () => {
                 this.selectThread(thread.id, thread.name);
+            });
+            
+            // Edit button event
+            const editBtn = threadElement.querySelector('.thread-edit-btn');
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.editThreadName(thread.id, thread.name);
+            });
+            
+            // Delete button event
+            const deleteBtn = threadElement.querySelector('.thread-delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteThread(thread.id, thread.name);
             });
             
             threadList.appendChild(threadElement);
@@ -130,6 +162,11 @@ class ChotGPTApp {
     
     selectThread(threadId, threadName) {
         this.currentThread = threadId;
+        
+        // Close mobile menu if open
+        if (window.innerWidth <= 768) {
+            this.closeMobileMenu();
+        }
         
         // Update UI
         document.getElementById('currentThreadName').textContent = threadName;
@@ -519,6 +556,114 @@ class ChotGPTApp {
         if (diff < 604800000) return Math.floor(diff / 86400000) + '日前';
         
         return date.toLocaleDateString('ja-JP');
+    }
+    
+    // Mobile menu methods
+    toggleMobileMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        if (sidebar.classList.contains('open')) {
+            this.closeMobileMenu();
+        } else {
+            this.openMobileMenu();
+        }
+    }
+    
+    openMobileMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+    
+    closeMobileMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+    
+    // Thread management methods
+    async editThreadName(threadId, currentName) {
+        const newName = prompt('スレッド名を編集:', currentName);
+        if (newName && newName.trim() && newName.trim() !== currentName) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'update');
+                formData.append('thread_id', threadId);
+                formData.append('name', newName.trim());
+                formData.append('csrf_token', window.csrfToken);
+                
+                const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('Update thread response:', data);
+                if (data.success) {
+                    // Update current thread name if this is the active thread
+                    if (this.currentThread == threadId) {
+                        document.getElementById('currentThreadName').textContent = newName.trim();
+                    }
+                    // Reload threads to reflect the change
+                    this.loadThreads();
+                } else {
+                    console.error('Update thread failed:', data);
+                    alert('スレッド名の更新に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+                }
+            } catch (error) {
+                console.error('Edit thread error:', error);
+                alert('スレッド名の更新中にエラーが発生しました');
+            }
+        }
+    }
+    
+    async deleteThread(threadId, threadName) {
+        if (confirm(`スレッド「${threadName}」を削除しますか？この操作は取り消せません。`)) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('thread_id', threadId);
+                formData.append('csrf_token', window.csrfToken);
+                
+                const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('Delete thread response:', data);
+                if (data.success) {
+                    // If this was the active thread, reset the view
+                    if (this.currentThread == threadId) {
+                        this.currentThread = null;
+                        this.currentMessageId = null;
+                        document.getElementById('currentThreadName').textContent = 'チャットを選択してください';
+                        document.getElementById('messagesContainer').innerHTML = `
+                            <div class="welcome-message">
+                                <h3>ChotGPTへようこそ</h3>
+                                <p>新しいチャットを開始するか、既存のスレッドを選択してください。</p>
+                            </div>
+                        `;
+                        this.hideTreeView();
+                    }
+                    // Reload threads to reflect the change
+                    this.loadThreads();
+                } else {
+                    console.error('Delete thread failed:', data);
+                    alert('スレッドの削除に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+                }
+            } catch (error) {
+                console.error('Delete thread error:', error);
+                alert('スレッドの削除中にエラーが発生しました');
+            }
+        }
     }
 }
 
