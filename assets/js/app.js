@@ -237,6 +237,11 @@ class ChotGPTApp {
                 // Get the path for current message instead of rendering entire tree
                 const messagePath = this.getMessagePath(data.tree);
                 this.renderMessagePath(messagePath);
+                
+                // Set currentMessageId to the last message in the displayed path
+                if (messagePath && messagePath.length > 0) {
+                    this.currentMessageId = messagePath[messagePath.length - 1].id;
+                }
             }
         } catch (error) {
             console.error('Failed to load messages:', error);
