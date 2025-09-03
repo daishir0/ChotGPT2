@@ -3,6 +3,11 @@ ini_set('memory_limit', '256M');
 ini_set('max_execution_time', 60);
 header('Content-Type: application/json');
 
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // 基本認証チェック
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     http_response_code(401);
@@ -77,7 +82,12 @@ try {
             break;
             
         case 'delete':
-            handleDelete($chatManager, $auth, $_POST);
+            // FormData for POST requests
+            $postData = $_POST;
+            if (empty($postData) && $_SERVER['CONTENT_TYPE'] === 'application/x-www-form-urlencoded') {
+                parse_str(file_get_contents('php://input'), $postData);
+            }
+            handleDelete($chatManager, $auth, $postData);
             break;
             
         case 'tree':
