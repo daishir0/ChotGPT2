@@ -51,9 +51,21 @@ class ChotGPTApp {
         // Message Input
         const messageInput = document.getElementById('messageInput');
         messageInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
+            if (e.key === 'Enter') {
+                // Check if device is mobile
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                    || window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    // Mobile: Enter key creates new line (default behavior)
+                    return;
+                } else {
+                    // PC: Enter sends message, Shift+Enter creates new line
+                    if (!e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                }
             }
         });
         
