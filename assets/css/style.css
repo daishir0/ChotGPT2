@@ -928,11 +928,26 @@ body {
     }
     
     .chat-header {
-        padding: 12px 16px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 8px 16px;
+        background-color: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .main-content {
+        padding-top: 60px; /* ヘッダーの高さ分のオフセット */
     }
     
     .thread-info h2 {
-        font-size: 18px;
+        font-size: 16px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 200px;
     }
     
     .chat-actions {
@@ -940,7 +955,11 @@ body {
     }
     
     .tree-toggle-btn {
-        padding: 6px 12px;
-        font-size: 14px;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    .messages-container {
+        padding: 16px;
     }
 }
