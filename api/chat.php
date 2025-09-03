@@ -73,7 +73,7 @@ try {
             
         case 'branch':
             $input = json_decode(file_get_contents('php://input'), true);
-            handleCreateBranch($chatManager, $auth, $input);
+            handleCreateBranch($chatManager, $auth, $input, $logger);
             break;
             
         default:
@@ -313,23 +313,49 @@ function handleUpdateContext($chatManager, $auth, $data) {
     echo json_encode(['success' => true]);
 }
 
-function handleCreateBranch($chatManager, $auth, $data) {
+function handleCreateBranch($chatManager, $auth, $data, $logger) {
     if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
         throw new Exception('Invalid CSRF token');
     }
     
-    $parentMessageId = $data['parent_message_id'] ?? null;
+    $clickedMessageId = $data['clicked_message_id'] ?? null;
     $content = $auth->sanitizeInput($data['content'] ?? '');
     $role = $data['role'] ?? 'user';
+    $systemPrompt = $data['system_prompt'] ?? null;
+    $model = $data['model'] ?? null;
     
-    if (!$parentMessageId || empty($content)) {
-        throw new Exception('Parent message ID and content required');
+    if (!$clickedMessageId || empty($content)) {
+        throw new Exception('Clicked message ID and content required');
     }
     
-    $branchMessageId = $chatManager->createBranch($parentMessageId, $content, $role);
+    // Get the clicked message to find its parent
+    $clickedMessage = $chatManager->getMessage($clickedMessageId);
+    if (!$clickedMessage) {
+        throw new Exception('Clicked message not found');
+    }
+    
+    // Use the same parent as the clicked message for branching
+    $branchParentId = $clickedMessage['parent_message_id'];
+    
+    // Create branch message
+    $branchMessageId = $chatManager->createBranch($branchParentId, $content, $role);
+    
+    $logger->info('Branch message created', [
+        'clicked_message_id' => $clickedMessageId,
+        'branch_parent_id' => $branchParentId,
+        'branch_message_id' => $branchMessageId,
+        'role' => $role
+    ]);
+    
+    // Generate AI response if the branch is a user message
+    $aiResponse = null;
+    if ($role === 'user') {
+        $aiResponse = generateAIResponse($chatManager, $branchMessageId, $systemPrompt, $model, $logger);
+    }
     
     echo json_encode([
         'success' => true,
-        'message_id' => $branchMessageId
+        'user_message_id' => $branchMessageId,
+        'ai_response' => $aiResponse
     ]);
 }

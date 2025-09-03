@@ -90,6 +90,11 @@ class TreeViewer {
             node.classList.toggle('current', node.dataset.messageId == messageId);
         });
         
+        // Reload chat display with the new message path
+        if (typeof app.loadMessages === 'function') {
+            app.loadMessages();
+        }
+        
         // Optionally, scroll to the message in the chat view
         this.scrollToMessage(messageId);
     }
@@ -290,6 +295,11 @@ class CanvasTreeViewer {
             if (clickedNode) {
                 app.currentMessageId = clickedNode.id;
                 this.render(this.tree); // Re-render to update selection
+                
+                // Reload chat display with the new message path
+                if (typeof app.loadMessages === 'function') {
+                    app.loadMessages();
+                }
             }
         }
     }

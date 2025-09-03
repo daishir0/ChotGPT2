@@ -777,6 +777,43 @@ body {
     color: var(--text-muted);
 }
 
+/* Branch Message Modal */
+.branch-message-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.branch-message-form label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.branch-message-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.4;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+}
+
+.branch-message-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.branch-message-form textarea::placeholder {
+    color: var(--text-muted);
+}
+
 /* Buttons */
 .btn-primary {
     padding: 12px 24px;

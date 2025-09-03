@@ -108,6 +108,30 @@ class ChotGPTApp {
             }
         });
         
+        // Branch Message Modal
+        document.getElementById('branchMessageClose').addEventListener('click', () => {
+            this.hideModal('branchMessageModal');
+        });
+        
+        document.getElementById('branchMessageCancel').addEventListener('click', () => {
+            this.hideModal('branchMessageModal');
+        });
+        
+        document.getElementById('branchMessageSave').addEventListener('click', () => {
+            this.saveBranchMessage();
+        });
+        
+        // Branch message textarea keyboard shortcuts
+        document.getElementById('branchMessageTextarea').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                this.saveBranchMessage();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this.hideModal('branchMessageModal');
+            }
+        });
+        
         // File Manager
         document.getElementById('fileManagerBtn').addEventListener('click', () => {
             window.fileManager.show();
@@ -210,7 +234,9 @@ class ChotGPTApp {
             const data = await response.json();
             
             if (data.success) {
-                this.renderMessages(data.tree);
+                // Get the path for current message instead of rendering entire tree
+                const messagePath = this.getMessagePath(data.tree);
+                this.renderMessagePath(messagePath);
             }
         } catch (error) {
             console.error('Failed to load messages:', error);
@@ -231,6 +257,109 @@ class ChotGPTApp {
             if (message.children && message.children.length > 0) {
                 this.renderMessages(message.children, container);
             }
+        });
+        
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    getMessagePath(tree) {
+        // If no current message selected, find the deepest message path
+        if (!this.currentMessageId) {
+            return this.findDeepestPath(tree);
+        }
+        
+        // Find path to currentMessageId
+        const path = [];
+        this.findMessagePath(tree, this.currentMessageId, path);
+        
+        // If clicked message has children, include the first child (AI response)
+        const clickedMessage = this.findMessageById(tree, this.currentMessageId);
+        if (clickedMessage && clickedMessage.children && clickedMessage.children.length > 0) {
+            path.push(clickedMessage.children[0]);
+        }
+        
+        return path;
+    }
+    
+    findDeepestPath(tree) {
+        let deepestPath = [];
+        
+        const traverse = (nodes, currentPath) => {
+            for (const node of nodes) {
+                const newPath = [...currentPath, node];
+                
+                if (!node.children || node.children.length === 0) {
+                    // Leaf node - check if this path is deeper
+                    if (newPath.length > deepestPath.length) {
+                        deepestPath = newPath;
+                    }
+                } else {
+                    // Continue traversing
+                    traverse(node.children, newPath);
+                }
+            }
+        };
+        
+        traverse(tree, []);
+        return deepestPath;
+    }
+    
+    findMessagePath(tree, targetId, currentPath) {
+        for (const node of tree) {
+            const newPath = [...currentPath, node];
+            
+            if (node.id == targetId) {
+                // Found the target - replace currentPath with the found path
+                currentPath.length = 0;
+                currentPath.push(...newPath);
+                return true;
+            }
+            
+            if (node.children && node.children.length > 0) {
+                if (this.findMessagePath(node.children, targetId, newPath)) {
+                    // Found in children - update currentPath with the result
+                    currentPath.length = 0;
+                    currentPath.push(...newPath);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    findMessageById(tree, targetId) {
+        for (const node of tree) {
+            if (node.id == targetId) {
+                return node;
+            }
+            
+            if (node.children && node.children.length > 0) {
+                const found = this.findMessageById(node.children, targetId);
+                if (found) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+    
+    renderMessagePath(messagePath) {
+        const container = document.getElementById('messagesContainer');
+        container.innerHTML = '';
+        
+        if (!messagePath || messagePath.length === 0) {
+            container.innerHTML = `
+                <div class="welcome-message">
+                    <h3>ChotGPTへようこそ</h3>
+                    <p>新しいチャットを開始するか、既存のスレッドを選択してください。</p>
+                </div>
+            `;
+            return;
+        }
+        
+        messagePath.forEach(message => {
+            const messageElement = this.createMessageElement(message);
+            container.appendChild(messageElement);
         });
         
         container.scrollTop = container.scrollHeight;
@@ -442,31 +571,77 @@ class ChotGPTApp {
     }
     
     async branchMessage(messageId) {
-        // Implementation for message branching
-        const content = prompt('分岐メッセージを入力してください:');
-        if (content !== null && content.trim()) {
-            try {
-                const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=branch`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        parent_message_id: messageId,
-                        content: content,
-                        csrf_token: window.csrfToken
-                    })
-                });
+        this.currentBranchParentId = messageId;
+        document.getElementById('branchMessageTextarea').value = '';
+        this.showModal('branchMessageModal');
+        
+        // Focus on textarea after modal is shown
+        setTimeout(() => {
+            const textarea = document.getElementById('branchMessageTextarea');
+            textarea.focus();
+        }, 100);
+    }
+    
+    async saveBranchMessage() {
+        const content = document.getElementById('branchMessageTextarea').value.trim();
+        
+        if (!content) {
+            alert('分岐メッセージ内容を入力してください');
+            return;
+        }
+        
+        if (!this.currentBranchParentId) {
+            alert('エラー: 分岐元のメッセージが見つかりません');
+            return;
+        }
+        
+        // Show loading spinner
+        document.getElementById('loadingSpinner').style.display = 'flex';
+        
+        try {
+            const response = await this.authenticatedFetch(`${this.apiBaseUrl}/chat.php?action=branch`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    clicked_message_id: this.currentBranchParentId,
+                    content: content,
+                    system_prompt: this.settings.systemPrompt,
+                    model: this.settings.model,
+                    csrf_token: window.csrfToken
+                })
+            });
+            
+            const data = await response.json();
+            console.log('Branch message response:', data);
+            
+            if (data.success) {
+                this.hideModal('branchMessageModal');
                 
-                const data = await response.json();
-                if (data.success) {
-                    this.currentMessageId = data.message_id;
-                    this.loadMessages();
-                    this.loadTree();
+                // Update current message to the AI response (for proper path display)
+                this.currentMessageId = data.ai_response && data.ai_response.message_id ? data.ai_response.message_id : data.user_message_id;
+                
+                // Check if AI response generation was successful
+                if (data.ai_response && data.ai_response.error) {
+                    alert('分岐は作成されましたが、AI応答の生成に失敗しました: ' + data.ai_response.error);
+                } else if (data.ai_response) {
+                    console.log('AI response generated for branch:', data.ai_response);
                 }
-            } catch (error) {
-                console.error('Branch message error:', error);
+                
+                // Reload messages and tree
+                this.loadMessages();
+                this.loadTree();
+                this.currentBranchParentId = null;
+            } else {
+                alert('分岐の作成に失敗しました: ' + (data.error || data.message || '不明なエラー'));
             }
+        } catch (error) {
+            console.error('Branch message error:', error);
+            alert('分岐の作成中にエラーが発生しました');
+        } finally {
+            // Hide loading spinner
+            document.getElementById('loadingSpinner').style.display = 'none';
         }
     }
     

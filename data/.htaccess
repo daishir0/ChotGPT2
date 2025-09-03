@@ -1,0 +1,3 @@
+# ChotGPT Data Protection
+Order deny,allow
+Deny from all

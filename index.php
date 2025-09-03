@@ -168,6 +168,26 @@ $csrfToken = $auth->generateCSRFToken();
             </div>
         </div>
         
+        <!-- Branch Message Modal -->
+        <div class="modal" id="branchMessageModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>メッセージを分岐</h3>
+                    <button class="modal-close" id="branchMessageClose">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="branch-message-form">
+                        <label for="branchMessageTextarea">分岐メッセージ内容:</label>
+                        <textarea id="branchMessageTextarea" rows="6" placeholder="分岐メッセージを入力してください..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="branchMessageCancel">キャンセル</button>
+                    <button class="btn-primary" id="branchMessageSave">分岐作成</button>
+                </div>
+            </div>
+        </div>
+        
         <!-- Settings Modal -->
         <div class="modal" id="settingsModal" style="display: none;">
             <div class="modal-content">
