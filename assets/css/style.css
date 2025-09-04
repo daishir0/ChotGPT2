@@ -1969,11 +1969,37 @@ html,
     border: 1px solid var(--border-color);
     padding: 1rem;
     overflow-x: auto;
+    overflow-y: visible;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Mermaid SVG要素の色調整 */
 .message-content .markdown-content .mermaid svg {
     background: transparent;
+}
+
+/* Mermaid全般のテキストサイズ調整 */
+.message-content .markdown-content .mermaid svg text {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* 円グラフ専用のテキストスタイル */
+.message-content .markdown-content .mermaid[data-diagram-type="pie"] svg text {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+/* ガントチャート専用のテキストスタイル */
+.message-content .markdown-content .mermaid[data-diagram-type="gantt"] svg text {
+    font-size: 14px !important;
+    font-weight: 500 !important;
 }
 
 /* ダークモード用のMermaid色調整 */
@@ -2021,13 +2047,19 @@ html,
 }
 
 .message-content .markdown-content .mermaid {
-    display: inline-block;
+    display: block;
     max-width: 100%;
+    width: 100%;
+    overflow: visible;
 }
 
 .message-content .markdown-content .mermaid svg {
     max-width: 100%;
+    width: auto;
     height: auto;
+    display: block;
+    margin: 0 auto;
+    max-height: 500px;
 }
 
 .message-content .markdown-content .mermaid-error {
@@ -2038,6 +2070,66 @@ html,
     font-family: monospace;
     font-size: 0.9rem;
     text-align: left;
+}
+
+/* State Diagram特有のスタイル調整 */
+.message-content .markdown-content .mermaid svg .stateLabel {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.message-content .markdown-content .mermaid svg .state-start,
+.message-content .markdown-content .mermaid svg .state-end {
+    fill: var(--accent-color) !important;
+}
+
+.message-content .markdown-content .mermaid svg .transition {
+    stroke-width: 2px !important;
+}
+
+/* State Diagram内のテキスト可読性向上 */
+.dark-theme .message-content .markdown-content .mermaid svg .stateLabel,
+.dark-theme .message-content .markdown-content .mermaid svg .state-label {
+    fill: var(--text-primary) !important;
+    font-weight: 500 !important;
+}
+
+.light-theme .message-content .markdown-content .mermaid svg .stateLabel,
+.light-theme .message-content .markdown-content .mermaid svg .state-label {
+    fill: var(--text-primary) !important;
+    font-weight: 500 !important;
+}
+
+/* State Diagram専用レイアウト最適化 */
+.message-content .markdown-content .mermaid.state-diagram {
+    min-height: 200px;
+    padding: 0.5rem;
+}
+
+.message-content .markdown-content .mermaid.state-diagram svg {
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 200px;
+    max-height: 400px;
+    overflow: visible !important;
+}
+
+/* State Diagram要素の可視性向上 */
+.message-content .markdown-content .mermaid.state-diagram svg .node rect {
+    stroke-width: 2px !important;
+    rx: 4px !important;
+    ry: 4px !important;
+}
+
+.message-content .markdown-content .mermaid.state-diagram svg .edgePath path {
+    stroke-width: 2px !important;
+    marker-end: url(#arrowhead) !important;
+}
+
+.message-content .markdown-content .mermaid.state-diagram svg text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
 }
 
 /* Message actions styles */
@@ -2202,6 +2294,11 @@ html,
     
     .message-content .markdown-content .mermaid svg {
         font-size: 12px;
+    }
+    
+    /* モバイルでの円グラフとガントチャート文字サイズ調整 */
+    .message-content .markdown-content .mermaid svg text {
+        font-size: 13px !important;
     }
 }
 

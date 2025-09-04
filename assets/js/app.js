@@ -35,8 +35,17 @@ class MessageRenderer {
         
         // Mermaid初期化
         if (typeof mermaid !== 'undefined') {
-            this.initializeMermaidTheme();
-            console.log('Mermaid initialized successfully');
+            try {
+                this.initializeMermaidTheme();
+                console.log('Mermaid initialized successfully', {
+                    version: mermaid.version || 'unknown',
+                    themes: mermaid.theme || 'default'
+                });
+            } catch (error) {
+                console.error('Mermaid initialization error:', error);
+            }
+        } else {
+            console.warn('Mermaid library not found - diagram rendering will be disabled');
         }
     }
     
@@ -60,10 +69,22 @@ class MessageRenderer {
                 // テーブルをレスポンシブ対応に変換
                 html = this.makeTablesResponsive(html);
                 
-                // Mermaidの後処理
-                setTimeout(() => this.processMermaidDiagrams(), 100);
+                const finalHtml = `<div class="markdown-content">${html}</div>`;
                 
-                return `<div class="markdown-content">${html}</div>`;
+                // Mermaidの後処理（DOMに追加後に実行）
+                // より確実なタイミングで実行するため遅延を長くする
+                setTimeout(() => {
+                    console.log('Starting Mermaid processing with delay...');
+                    this.processMermaidDiagrams();
+                }, 200);
+                
+                // さらなる保険として追加の遅延処理も実行
+                setTimeout(() => {
+                    console.log('Additional Mermaid processing attempt...');
+                    this.processMermaidDiagrams();
+                }, 500);
+                
+                return finalHtml;
             } else {
                 // 通常のテキストとして処理
                 return this.escapeHtml(content).replace(/\n/g, '<br>');
@@ -101,9 +122,14 @@ class MessageRenderer {
             /```pie[\s\S]*?```/i,          // pie記法
             /```mindmap[\s\S]*?```/i,      // mindmap記法
             /```stateDiagram[\s\S]*?```/i, // stateDiagram記法
+            /```stateDiagram-v2[\s\S]*?```/i, // stateDiagram-v2記法
             /```state[\s\S]*?```/i,        // state記法（短縮形）
             /```journey[\s\S]*?```/i,      // journey記法
-            /```gitgraph[\s\S]*?```/i      // gitgraph記法
+            /```gitgraph[\s\S]*?```/i,     // gitgraph記法
+            /```classDiagram[\s\S]*?```/i, // classDiagram記法
+            /```erDiagram[\s\S]*?```/i,    // erDiagram記法
+            /```class[\s\S]*?```/i,        // class記法（短縮形）
+            /```er[\s\S]*?```/i            // er記法（短縮形）
         ];
         
         return mermaidPatterns.some(pattern => pattern.test(content));
@@ -117,6 +143,23 @@ class MessageRenderer {
             securityLevel: 'loose',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             theme: isDark ? 'dark' : 'default',
+            // State Diagram特有の設定
+            state: {
+                primaryColor: isDark ? '#4a9eff' : '#4a9eff',
+                primaryTextColor: isDark ? '#ffffff' : '#1f2937',
+                primaryBorderColor: isDark ? '#6b7280' : '#d1d5db',
+                lineColor: isDark ? '#9ca3af' : '#6b7280',
+                secondaryColor: isDark ? '#374151' : '#f3f4f6',
+                tertiaryColor: isDark ? '#1f2937' : '#ffffff',
+                background: isDark ? '#111827' : '#ffffff',
+                transitionColor: isDark ? '#9ca3af' : '#6b7280',
+                transitionLabelColor: isDark ? '#ffffff' : '#1f2937',
+                stateLabelColor: isDark ? '#ffffff' : '#1f2937',
+                stateBkg: isDark ? '#374151' : '#f9fafb',
+                labelBoxBkgColor: isDark ? '#1f2937' : '#ffffff',
+                labelBoxBorderColor: isDark ? '#6b7280' : '#d1d5db',
+                labelTextColor: isDark ? '#ffffff' : '#1f2937'
+            },
             themeVariables: isDark ? {
                 // ダークモード用カスタムカラー
                 primaryColor: '#4a9eff',
@@ -128,7 +171,16 @@ class MessageRenderer {
                 background: '#111827',
                 mainBkg: '#1f2937',
                 secondBkg: '#374151',
-                tertiaryBkg: '#4b5563'
+                tertiaryBkg: '#4b5563',
+                // State Diagram専用変数
+                cScale0: '#4a9eff',
+                cScale1: '#374151',
+                cScale2: '#1f2937',
+                stateLabelColor: '#ffffff',
+                stateBkg: '#374151',
+                labelBoxBkgColor: '#1f2937',
+                labelBoxBorderColor: '#6b7280',
+                labelTextColor: '#ffffff'
             } : {
                 // ライトモード用カスタムカラー
                 primaryColor: '#4a9eff',
@@ -140,7 +192,16 @@ class MessageRenderer {
                 background: '#ffffff',
                 mainBkg: '#ffffff',
                 secondBkg: '#f9fafb',
-                tertiaryBkg: '#f3f4f6'
+                tertiaryBkg: '#f3f4f6',
+                // State Diagram専用変数
+                cScale0: '#4a9eff',
+                cScale1: '#f3f4f6',
+                cScale2: '#ffffff',
+                stateLabelColor: '#1f2937',
+                stateBkg: '#f9fafb',
+                labelBoxBkgColor: '#ffffff',
+                labelBoxBorderColor: '#d1d5db',
+                labelTextColor: '#1f2937'
             }
         };
         
@@ -156,15 +217,37 @@ class MessageRenderer {
         try {
             // Mermaidコードブロックをプレースホルダーに置換
             let diagramCount = 0;
-            content = content.replace(/```(mermaid|graph|flowchart|sequence|gantt|pie|mindmap|stateDiagram|state|journey|gitgraph)\n([\s\S]*?)```/gi, (match, type, diagramCode) => {
+            content = content.replace(/```(mermaid|graph|flowchart|sequence|gantt|pie|mindmap|stateDiagram|stateDiagram-v2|state|journey|gitgraph|classDiagram|erDiagram|class|er)\n([\s\S]*?)```/gi, (match, type, diagramCode) => {
                 const diagramId = `mermaid-diagram-${Date.now()}-${diagramCount++}`;
                 
+                // diagramCodeから不要なエンコーディングをクリーンアップ
+                const cleanDiagramCode = this.cleanDiagramCode(diagramCode.trim());
+                
+                console.log('Preprocessing Mermaid diagram:', {
+                    type,
+                    id: diagramId,
+                    originalCode: diagramCode.substring(0, 100) + '...',
+                    cleanedCode: cleanDiagramCode.substring(0, 100) + '...'
+                });
+                
                 // プレースホルダーを作成（後でSVGに置換される）
-                return `<div class="mermaid-container">
-                    <div class="mermaid" id="${diagramId}" data-diagram="${this.escapeHtml(diagramCode.trim())}">
-                        ${diagramCode.trim()}
-                    </div>
-                </div>`;
+                // data-diagram属性にはBase64エンコードを使用してHTML干渉を回避
+                try {
+                    const encodedCode = btoa(unescape(encodeURIComponent(cleanDiagramCode)));
+                    return `<div class="mermaid-container">
+                        <div class="mermaid" id="${diagramId}" data-diagram-b64="${encodedCode}" data-diagram-type="${type}">
+                            <!-- Diagram will be rendered here -->
+                        </div>
+                    </div>`;
+                } catch (encodeError) {
+                    console.error('Failed to encode diagram:', encodeError);
+                    return `<div class="mermaid-container">
+                        <div class="mermaid-error">
+                            <strong>図表エンコーディングエラー:</strong><br>
+                            <code>${this.escapeHtml(encodeError.message)}</code>
+                        </div>
+                    </div>`;
+                }
             });
             
             return content;
@@ -174,33 +257,203 @@ class MessageRenderer {
         }
     }
     
+    cleanDiagramCode(code) {
+        // HTMLエンティティのデコード
+        return code
+            .replace(/&amp;gt;/g, '>')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;lt;/g, '<')
+            .replace(/&lt;/g, '<')
+            .replace(/&amp;amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&nbsp;/g, ' ')
+            .trim();
+    }
+    
     async processMermaidDiagrams() {
-        if (typeof mermaid === 'undefined') return;
+        if (typeof mermaid === 'undefined') {
+            console.warn('Mermaid library not available');
+            return;
+        }
+        
+        console.log('Starting Mermaid diagram processing...');
         
         // テーマが変更されている可能性があるので再初期化
         this.initializeMermaidTheme();
         
         const diagrams = document.querySelectorAll('.mermaid:not(.mermaid-processed)');
+        console.log(`Found ${diagrams.length} unprocessed Mermaid diagrams`);
+        
+        if (diagrams.length === 0) {
+            console.log('No unprocessed Mermaid diagrams found');
+            return;
+        }
         
         for (const diagram of diagrams) {
             try {
-                const diagramCode = diagram.dataset.diagram || diagram.textContent;
+                console.log('Processing diagram:', diagram.id);
                 
-                if (diagramCode.trim()) {
-                    // SVGを生成
-                    const { svg } = await mermaid.render(diagram.id + '-svg', diagramCode);
-                    diagram.innerHTML = svg;
-                    diagram.classList.add('mermaid-processed');
+                // Base64エンコードされたデータからdiagramCodeを復元
+                let diagramCode = '';
+                if (diagram.dataset.diagramB64) {
+                    try {
+                        diagramCode = decodeURIComponent(escape(atob(diagram.dataset.diagramB64)));
+                        console.log('Successfully decoded diagram from Base64');
+                    } catch (decodeError) {
+                        console.warn('Base64 decode error, falling back to textContent:', decodeError);
+                        diagramCode = diagram.dataset.diagram || diagram.textContent;
+                    }
+                } else {
+                    diagramCode = diagram.dataset.diagram || diagram.textContent;
                 }
+                
+                if (!diagramCode || !diagramCode.trim()) {
+                    console.warn('No diagram code found for:', diagram.id);
+                    diagram.innerHTML = `<div class="mermaid-error">
+                        <strong>図表エラー:</strong><br>
+                        <code>図表コードが見つかりません</code>
+                    </div>`;
+                    diagram.classList.add('mermaid-processed');
+                    continue;
+                }
+                
+                // HTMLエンティティが残っている場合は追加でクリーンアップ
+                const originalCode = diagramCode;
+                diagramCode = this.cleanDiagramCode(diagramCode.trim());
+                
+                console.log('Processing diagram:', {
+                    id: diagram.id,
+                    type: diagram.dataset.diagramType,
+                    originalLength: originalCode.length,
+                    cleanedLength: diagramCode.length,
+                    codePreview: diagramCode.substring(0, 100) + (diagramCode.length > 100 ? '...' : '')
+                });
+                
+                // SVGを生成
+                const renderStartTime = performance.now();
+                const { svg } = await mermaid.render(diagram.id + '-svg', diagramCode);
+                const renderEndTime = performance.now();
+                
+                console.log(`Mermaid rendering completed for ${diagram.id} in ${renderEndTime - renderStartTime}ms`);
+                
+                // SVGを挿入
+                diagram.innerHTML = svg;
+                diagram.classList.add('mermaid-processed');
+                
+                // SVG要素に基本スタイルを適用
+                const svgElement = diagram.querySelector('svg');
+                if (svgElement) {
+                    // 基本スタイル設定
+                    svgElement.style.maxWidth = '100%';
+                    svgElement.style.width = 'auto';
+                    svgElement.style.height = 'auto';
+                    svgElement.style.maxHeight = '500px';
+                    svgElement.style.display = 'block';
+                    svgElement.style.margin = '0 auto';
+                    
+                    // 図表タイプ別の最適化
+                    const diagramType = diagram.dataset.diagramType;
+                    switch(diagramType) {
+                        case 'pie':
+                            svgElement.style.maxWidth = '500px';
+                            svgElement.style.maxHeight = '500px';
+                            svgElement.style.minWidth = '300px';
+                            svgElement.style.minHeight = '300px';
+                            // 円グラフのテキストサイズを大きくする
+                            const pieTexts = svgElement.querySelectorAll('text');
+                            pieTexts.forEach(text => {
+                                text.style.fontSize = '16px';
+                                text.style.fontWeight = '600';
+                                text.style.fill = 'var(--text-primary)';
+                            });
+                            break;
+                        case 'gantt':
+                            svgElement.style.maxWidth = '900px';
+                            svgElement.style.maxHeight = '500px';
+                            svgElement.style.minWidth = '400px';
+                            svgElement.style.minHeight = '250px';
+                            // ガントチャートのテキストサイズを大きくする
+                            const ganttTexts = svgElement.querySelectorAll('text');
+                            ganttTexts.forEach(text => {
+                                text.style.fontSize = '14px';
+                                text.style.fontWeight = '500';
+                                text.style.fill = 'var(--text-primary)';
+                            });
+                            break;
+                        case 'sequence':
+                            svgElement.style.maxWidth = '700px';
+                            svgElement.style.maxHeight = '500px';
+                            break;
+                        case 'flowchart':
+                        case 'graph':
+                            svgElement.style.maxWidth = '600px';
+                            svgElement.style.maxHeight = '500px';
+                            break;
+                        case 'stateDiagram':
+                        case 'stateDiagram-v2':
+                        case 'state':
+                            svgElement.style.maxWidth = '500px';
+                            svgElement.style.maxHeight = '400px';
+                            break;
+                        case 'classDiagram':
+                        case 'class':
+                            svgElement.style.maxWidth = '600px';
+                            svgElement.style.maxHeight = '500px';
+                            break;
+                        case 'erDiagram':
+                        case 'er':
+                            svgElement.style.maxWidth = '700px';
+                            svgElement.style.maxHeight = '500px';
+                            break;
+                        case 'gitgraph':
+                            svgElement.style.maxWidth = '600px';
+                            svgElement.style.maxHeight = '300px';
+                            break;
+                        default:
+                            svgElement.style.maxWidth = '600px';
+                            svgElement.style.maxHeight = '400px';
+                    }
+                    
+                    console.log(`Successfully rendered ${diagramType || 'unknown'} diagram:`, diagram.id);
+                } else {
+                    console.warn('SVG element not found after rendering:', diagram.id);
+                }
+                
             } catch (error) {
-                console.warn('Mermaid rendering error:', error);
-                diagram.innerHTML = `<div class="mermaid-error">
-                    <strong>図表レンダリングエラー:</strong><br>
-                    <code>${this.escapeHtml(error.message)}</code>
+                console.error('Mermaid rendering error for diagram:', diagram.id, error);
+                
+                let failedCode = 'コード取得エラー';
+                try {
+                    failedCode = diagram.dataset.diagramB64 ? 
+                        decodeURIComponent(escape(atob(diagram.dataset.diagramB64))) : 
+                        (diagram.dataset.diagram || diagram.textContent || 'コードなし');
+                } catch (decodeError) {
+                    console.warn('Failed to decode error code:', decodeError);
+                }
+                
+                diagram.innerHTML = `<div class="mermaid-error" style="
+                    padding: 12px;
+                    background-color: var(--error-bg, #fee);
+                    border: 1px solid var(--error-border, #fcc);
+                    border-radius: 4px;
+                    color: var(--error-text, #c00);
+                    font-family: monospace;
+                    font-size: 12px;
+                ">
+                    <strong style="color: var(--error-text, #c00);">🚨 Mermaid図表レンダリングエラー</strong><br>
+                    <code style="background: var(--code-bg, #f5f5f5); padding: 2px 4px; border-radius: 2px;">${this.escapeHtml(error.message)}</code>
+                    <details style="margin-top: 8px;">
+                        <summary style="cursor: pointer; color: var(--primary-color, #007bff);">図表コードを表示</summary>
+                        <pre style="white-space: pre-wrap; margin-top: 8px; font-size: 11px;">${this.escapeHtml(failedCode.substring(0, 500))}${failedCode.length > 500 ? '\n... (truncated)' : ''}</pre>
+                    </details>
                 </div>`;
                 diagram.classList.add('mermaid-processed');
+                diagram.classList.add('mermaid-error-state');
             }
         }
+        
+        console.log('Mermaid diagram processing completed');
     }
     
     preprocessMath(content) {
@@ -318,9 +571,14 @@ class MessageRenderer {
             /```graph[\s\S]*?```/i,       // Graph記法
             /```flowchart[\s\S]*?```/i,   // Flowchart記法
             /```stateDiagram[\s\S]*?```/i, // StateDiagram記法
+            /```stateDiagram-v2[\s\S]*?```/i, // StateDiagram-v2記法
             /```state[\s\S]*?```/i,       // State記法
             /```journey[\s\S]*?```/i,     // Journey記法
-            /```gitgraph[\s\S]*?```/i     // Gitgraph記法
+            /```gitgraph[\s\S]*?```/i,    // Gitgraph記法
+            /```classDiagram[\s\S]*?```/i, // ClassDiagram記法
+            /```erDiagram[\s\S]*?```/i,    // ErDiagram記法
+            /```class[\s\S]*?```/i,       // Class記法
+            /```er[\s\S]*?```/i           // Er記法
         ];
         
         return markdownPatterns.some(pattern => pattern.test(content));
