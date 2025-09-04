@@ -117,7 +117,7 @@ class OpenAIClient {
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $this->apiKey
             ],
-            CURLOPT_TIMEOUT => 60,
+            CURLOPT_TIMEOUT => 300,
             CURLOPT_SSL_VERIFYPEER => true
         ]);
         
