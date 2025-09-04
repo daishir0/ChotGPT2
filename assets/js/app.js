@@ -403,16 +403,25 @@ class ChotGPTApp {
             container.innerHTML = '';
         }
         
-        tree.forEach(message => {
-            const messageElement = this.createMessageElement(message);
-            container.appendChild(messageElement);
-            
-            // Render children if they exist
-            if (message.children && message.children.length > 0) {
-                this.renderMessages(message.children, container);
-            }
-        });
+        let userMessageIndex = 0;
         
+        const renderRecursively = (messages) => {
+            messages.forEach(message => {
+                if (message.role === 'user') {
+                    userMessageIndex++;
+                }
+                
+                const messageElement = this.createMessageElement(message, userMessageIndex);
+                container.appendChild(messageElement);
+                
+                // Render children if they exist
+                if (message.children && message.children.length > 0) {
+                    renderRecursively(message.children);
+                }
+            });
+        };
+        
+        renderRecursively(tree);
         container.scrollTop = container.scrollHeight;
     }
     
@@ -511,15 +520,21 @@ class ChotGPTApp {
             return;
         }
         
+        let userMessageIndex = 0;
+        
         messagePath.forEach(message => {
-            const messageElement = this.createMessageElement(message);
+            if (message.role === 'user') {
+                userMessageIndex++;
+            }
+            
+            const messageElement = this.createMessageElement(message, userMessageIndex);
             container.appendChild(messageElement);
         });
         
         container.scrollTop = container.scrollHeight;
     }
     
-    createMessageElement(message) {
+    createMessageElement(message, userMessageIndex = 0) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${message.role}`;
         messageDiv.dataset.messageId = message.id;
@@ -528,13 +543,18 @@ class ChotGPTApp {
         const avatarClass = message.role === 'user' ? 'user' : 'assistant';
         
         // アクションボタンはユーザーメッセージにのみ表示
-        const actionsHTML = message.role === 'user' ? `
-            <div class="message-actions">
-                <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="編集">✏️</button>
-                <button class="message-action-btn" onclick="app.branchMessage(${message.id})" title="分岐">🌿</button>
-                <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="削除">🗑️</button>
-            </div>
-        ` : '';
+        // ただし、最初のユーザーメッセージ（userMessageIndex === 1）には分岐ボタンを表示しない
+        let actionsHTML = '';
+        if (message.role === 'user') {
+            const showBranchButton = userMessageIndex > 1;
+            actionsHTML = `
+                <div class="message-actions">
+                    <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="編集">✏️</button>
+                    ${showBranchButton ? `<button class="message-action-btn" onclick="app.branchMessage(${message.id})" title="分岐">🌿</button>` : ''}
+                    <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="削除">🗑️</button>
+                </div>
+            `;
+        }
         
         messageDiv.innerHTML = `
             <div class="message-avatar ${avatarClass}">${avatar}</div>
