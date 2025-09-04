@@ -257,8 +257,8 @@ function handleSetPersona($chatManager, $auth, $data) {
     }
     
     // Validate system prompt length
-    if (strlen($systemPrompt) > 10000) {
-        throw new Exception('Thread system prompt is too long (max 10000 characters)');
+    if (strlen($systemPrompt) > 50000) {
+        throw new Exception('Thread system prompt is too long (max 50000 characters)');
     }
     
     $chatManager->updateThreadSystemPrompt($threadId, $systemPrompt);

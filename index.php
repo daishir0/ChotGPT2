@@ -298,7 +298,7 @@ $csrfToken = $auth->generateCSRFToken();
                         
                         <div class="persona-meta">
                             <div class="character-count">
-                                <span id="personaCharCount">0</span><span class="count-limit">/1000</span>
+                                <span id="personaCharCount">0</span><span class="count-limit">/50000</span>
                             </div>
                             <div class="persona-hint">
                                 💡 基本システムプロンプトに追加適用されます

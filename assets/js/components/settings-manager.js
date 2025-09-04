@@ -220,8 +220,8 @@ class SettingsManager {
         
         const persona = document.getElementById('threadPersonaTextarea').value.trim();
         
-        if (persona.length > 1000) {
-            alert('ペルソナは1000文字以内で入力してください');
+        if (persona.length > 50000) {
+            alert('ペルソナは50000文字以内で入力してください');
             return;
         }
         
@@ -265,9 +265,9 @@ class SettingsManager {
         
         // Change color based on limit
         const countElement = document.getElementById('personaCharCount');
-        if (count > 1000) {
+        if (count > 50000) {
             countElement.style.color = 'var(--error-color, #ff4444)';
-        } else if (count > 800) {
+        } else if (count > 40000) {
             countElement.style.color = 'var(--warning-color, #ffaa00)';
         } else {
             countElement.style.color = '';
