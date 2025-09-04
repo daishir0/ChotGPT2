@@ -193,7 +193,7 @@ class FileManager {
                     $highestRow = $worksheet->getHighestRow();
                     $highestColumn = $worksheet->getHighestColumn();
                     
-                    for ($row = 1; $row <= min($highestRow, 100); $row++) {
+                    for ($row = 1; $row <= $highestRow; $row++) {
                         $rowData = [];
                         for ($col = 'A'; $col <= $highestColumn; $col++) {
                             $cellValue = $worksheet->getCell($col . $row)->getCalculatedValue();
@@ -224,7 +224,7 @@ class FileManager {
             $isFirstRow = true;
             $headers = [];
             
-            while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+            while (($data = fgetcsv($handle, 0, ",")) !== false) {
                 if ($isFirstRow) {
                     // First row as headers
                     $headers = $data;
@@ -314,7 +314,7 @@ class FileManager {
         $content = "# PowerPoint Presentation\n\n";
         
         // Extract slide content from XML files
-        for ($i = 1; $i <= 50; $i++) { // Check up to 50 slides
+        for ($i = 1; ; $i++) { // Check all slides
             $slideXml = $zip->getFromName("ppt/slides/slide{$i}.xml");
             if ($slideXml === false) {
                 break; // No more slides
@@ -439,20 +439,36 @@ class FileManager {
         return $this->db->fetchOne($sql, [$fileId]);
     }
     
-    public function getFiles($limit = 50, $offset = 0) {
-        $sql = "SELECT * FROM files ORDER BY created_at DESC LIMIT ? OFFSET ?";
-        return $this->db->fetchAll($sql, [$limit, $offset]);
+    public function getFiles($limit = null, $offset = 0) {
+        if ($limit === null) {
+            $sql = "SELECT * FROM files ORDER BY created_at DESC";
+            return $this->db->fetchAll($sql);
+        } else {
+            $sql = "SELECT * FROM files ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            return $this->db->fetchAll($sql, [$limit, $offset]);
+        }
     }
     
-    public function searchFiles($query, $limit = 20) {
-        $sql = "SELECT * FROM files WHERE 
-                original_name LIKE ? OR 
-                content_markdown LIKE ? OR 
-                metadata LIKE ? 
-                ORDER BY created_at DESC LIMIT ?";
-        
-        $searchTerm = "%{$query}%";
-        return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm, $limit]);
+    public function searchFiles($query, $limit = null) {
+        if ($limit === null) {
+            $sql = "SELECT * FROM files WHERE 
+                    original_name LIKE ? OR 
+                    content_markdown LIKE ? OR 
+                    metadata LIKE ? 
+                    ORDER BY created_at DESC";
+            
+            $searchTerm = "%{$query}%";
+            return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm]);
+        } else {
+            $sql = "SELECT * FROM files WHERE 
+                    original_name LIKE ? OR 
+                    content_markdown LIKE ? OR 
+                    metadata LIKE ? 
+                    ORDER BY created_at DESC LIMIT ?";
+            
+            $searchTerm = "%{$query}%";
+            return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm, $limit]);
+        }
     }
     
     public function deleteFile($fileId) {
