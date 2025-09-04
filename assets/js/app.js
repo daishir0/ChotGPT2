@@ -35,7 +35,11 @@ class MessageRenderer {
         try {
             // Markdown判定
             if (this.isMarkdownContent(content)) {
-                const html = marked ? marked.parse(content) : this.escapeHtml(content);
+                let html = marked ? marked.parse(content) : this.escapeHtml(content);
+                
+                // テーブルをレスポンシブ対応に変換
+                html = this.makeTablesResponsive(html);
+                
                 return `<div class="markdown-content">${html}</div>`;
             } else {
                 // 通常のテキストとして処理
@@ -45,6 +49,11 @@ class MessageRenderer {
             console.warn('Markdown rendering error:', error);
             return this.escapeHtml(content).replace(/\n/g, '<br>');
         }
+    }
+    
+    makeTablesResponsive(html) {
+        // テーブルをラッパーで囲む
+        return html.replace(/<table([^>]*)>/g, '<div class="table-wrapper"><table$1>').replace(/<\/table>/g, '</table></div>');
     }
     
     isMarkdownContent(content) {

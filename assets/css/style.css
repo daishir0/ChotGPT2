@@ -1846,13 +1846,37 @@ html,
     line-height: 1.5;
 }
 
+/* テーブルレスポンシブ対応 */
+.message-content .markdown-content .table-wrapper {
+    position: relative;
+    overflow-x: auto;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.message-content .markdown-content .table-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.message-content .markdown-content .table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.message-content .markdown-content .table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 3px;
+}
+
 .message-content .markdown-content table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1rem 0;
+    margin: 0;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid var(--border-color);
+    border: none;
 }
 
 .message-content .markdown-content th,
@@ -1920,17 +1944,53 @@ html,
         font-size: 0.8rem;
     }
     
+    .message-content .markdown-content blockquote {
+        margin: 0.8rem 0;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    /* モバイル用テーブル最適化 */
+    .message-content .markdown-content .table-wrapper::after {
+        content: '← → スクロール';
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: var(--bg-primary);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        color: var(--text-muted);
+        opacity: 0.8;
+        pointer-events: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
     .message-content .markdown-content table {
-        font-size: 0.85rem;
+        min-width: 500px;
+        font-size: 0.8rem;
     }
     
     .message-content .markdown-content th,
     .message-content .markdown-content td {
-        padding: 0.5rem;
+        padding: 0.4rem 0.6rem;
+        white-space: nowrap;
+    }
+}
+
+/* 極小画面での最適化 */
+@media (max-width: 480px) {
+    .message-content .markdown-content .table-wrapper::after {
+        content: '←→';
+        font-size: 9px;
+        padding: 1px 4px;
     }
     
-    .message-content .markdown-content blockquote {
-        margin: 0.8rem 0;
-        padding: 0.4rem 0.8rem;
+    .message-content .markdown-content table {
+        font-size: 0.75rem;
+    }
+    
+    .message-content .markdown-content th,
+    .message-content .markdown-content td {
+        padding: 0.3rem 0.4rem;
     }
 }
