@@ -71,6 +71,8 @@ class MessageRenderer {
                 
                 const finalHtml = `<div class="markdown-content">${html}</div>`;
                 
+                // Markdownコンテンツのレンダリング完了
+                
                 // Mermaidの後処理（DOMに追加後に実行）
                 // より確実なタイミングで実行するため遅延を長くする
                 setTimeout(() => {
@@ -99,6 +101,7 @@ class MessageRenderer {
         // テーブルをラッパーで囲む
         return html.replace(/<table([^>]*)>/g, '<div class="table-wrapper"><table$1>').replace(/<\/table>/g, '</table></div>');
     }
+    
     
     hasMathContent(content) {
         const mathPatterns = [

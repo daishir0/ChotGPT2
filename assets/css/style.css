@@ -1846,16 +1846,19 @@ html,
     line-height: 1.5;
 }
 
-/* テーブルレスポンシブ対応 - PC・モバイル共通 */
+/* テーブルレスポンシブ対応 - シンプル版 */
 .message-content .markdown-content .table-wrapper {
     position: relative;
-    overflow-x: auto;
+    overflow-x: scroll !important;
+    overflow-y: visible !important;
     border-radius: 8px;
     margin: 1rem 0;
     border: 1px solid var(--border-color);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    /* PC版でも横スクロールを有効化 */
     max-width: 100%;
+    /* 全プラットフォーム対応のスクロール */
+    -webkit-overflow-scrolling: touch;
+    touch-action: auto;
 }
 
 .message-content .markdown-content .table-wrapper::-webkit-scrollbar {
@@ -1873,14 +1876,14 @@ html,
 }
 
 .message-content .markdown-content table {
-    width: 100%;
+    width: auto;
     border-collapse: collapse;
     margin: 0;
     border-radius: 8px;
     overflow: hidden;
     border: none;
-    /* カラム幅の最小値を設定して可読性を保持 */
-    min-width: max-content;
+    /* シンプルに最小幅を設定 */
+    min-width: 500px;
 }
 
 .message-content .markdown-content th,
