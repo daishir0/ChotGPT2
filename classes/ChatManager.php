@@ -20,12 +20,12 @@ class ChatManager {
     }
     
     public function getThreads() {
-        $sql = "SELECT * FROM threads ORDER BY updated_at DESC";
+        $sql = "SELECT * FROM threads WHERE deleted_at IS NULL ORDER BY updated_at DESC";
         return $this->db->fetchAll($sql);
     }
     
     public function getThread($threadId) {
-        $sql = "SELECT * FROM threads WHERE id = ?";
+        $sql = "SELECT * FROM threads WHERE id = ? AND deleted_at IS NULL";
         return $this->db->fetchOne($sql, [$threadId]);
     }
     
@@ -37,10 +37,10 @@ class ChatManager {
     }
     
     public function deleteThread($threadId) {
-        $sql = "DELETE FROM threads WHERE id = ?";
+        $sql = "UPDATE threads SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?";
         $this->db->query($sql, [$threadId]);
         
-        $this->logger->info('Thread deleted', ['thread_id' => $threadId]);
+        $this->logger->info('Thread logically deleted', ['thread_id' => $threadId]);
     }
     
     public function updateThreadSystemPrompt($threadId, $systemPrompt) {
@@ -54,7 +54,7 @@ class ChatManager {
     }
     
     public function getThreadSystemPrompt($threadId) {
-        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ?";
+        $sql = "SELECT thread_system_prompt FROM threads WHERE id = ? AND deleted_at IS NULL";
         $result = $this->db->fetchOne($sql, [$threadId]);
         return $result ? $result['thread_system_prompt'] : '';
     }
