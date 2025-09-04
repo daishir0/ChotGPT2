@@ -170,9 +170,10 @@ $csrfToken = $auth->generateCSRFToken();
                     <div class="filter-chips">
                         <span class="chip active" data-type="all">すべて</span>
                         <span class="chip" data-type="pdf">PDF</span>
-                        <span class="chip" data-type="image">画像</span>
-                        <span class="chip" data-type="document">文書</span>
-                        <span class="chip" data-type="other">その他</span>
+                        <span class="chip" data-type="word">Word</span>
+                        <span class="chip" data-type="excel">Excel</span>
+                        <span class="chip" data-type="ppt">PPT</span>
+                        <span class="chip" data-type="text">TEXT</span>
                     </div>
                     
                     <!-- Selection Toolbar -->
@@ -374,20 +375,34 @@ $csrfToken = $auth->generateCSRFToken();
         window.csrfToken = window.appConfig.csrfToken;
         window.authCredentials = window.appConfig.authCredentials;
     </script>
-    <!-- Markdown処理ライブラリ -->
+    <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
-    
-    <!-- 数式レンダリングライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    
-    <!-- 図表・ダイアグラムライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-    
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/tree.js"></script>
-    <script src="assets/js/files.js"></script>
+
+    <!-- Core Framework -->
+    <script src="assets/js/core/utils.js"></script>
+    <script src="assets/js/core/api-client.js"></script>
+
+    <!-- Components -->
+    <script src="assets/js/components/message-renderer.js"></script>
+    <script src="assets/js/components/settings-manager.js"></script>
+    <script src="assets/js/components/ui-manager.js"></script>
+    <script src="assets/js/components/chat-manager.js"></script>
+    <script src="assets/js/components/thread-manager.js"></script>
+    <script src="assets/js/components/file-manager.js"></script>
+
+    <!-- Modules -->
+    <script src="assets/js/modules/mobile-handler.js"></script>
+    <script src="assets/js/modules/message-actions.js"></script>
+
+    <!-- Main Application -->
+    <script src="assets/js/core/app.js"></script>
+
+    <!-- Legacy Components -->
+    <script src="assets/js/legacy/tree.js"></script>
 </body>
 </html>

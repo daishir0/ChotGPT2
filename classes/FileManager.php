@@ -1,5 +1,10 @@
 <?php
 
+// Load Composer autoloader for Office document parsing libraries
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
+
 class FileManager {
     private $db;
     private $logger;
@@ -250,7 +255,101 @@ class FileManager {
     }
     
     private function convertPptxToMarkdown($filePath) {
-        return "# PowerPoint Presentation\n\nPowerPoint parsing not yet implemented.";
+        if (class_exists('\\PhpOffice\\PhpPresentation\\IOFactory')) {
+            try {
+                $presentation = \PhpOffice\PhpPresentation\IOFactory::load($filePath);
+                $content = "# PowerPoint Presentation\n\n";
+                
+                $slideNumber = 1;
+                foreach ($presentation->getAllSlides() as $slide) {
+                    $content .= "## Slide " . $slideNumber . "\n\n";
+                    
+                    foreach ($slide->getShapeCollection() as $shape) {
+                        if ($shape instanceof \PhpOffice\PhpPresentation\Shape\RichText) {
+                            $textContent = '';
+                            foreach ($shape->getParagraphs() as $paragraph) {
+                                foreach ($paragraph->getRichTextElements() as $element) {
+                                    if ($element instanceof \PhpOffice\PhpPresentation\Shape\RichText\TextElement) {
+                                        $textContent .= $element->getText();
+                                    }
+                                }
+                                $textContent .= "\n";
+                            }
+                            
+                            if (!empty(trim($textContent))) {
+                                $content .= trim($textContent) . "\n\n";
+                            }
+                        }
+                    }
+                    
+                    $slideNumber++;
+                }
+                
+                return $content;
+            } catch (Exception $e) {
+                $this->logger->warning('PPTX parsing failed', ['error' => $e->getMessage()]);
+            }
+        }
+        
+        // Fallback: Try to extract using ZIP parsing (PPTX is ZIP-based)
+        try {
+            return $this->extractPptxWithZip($filePath);
+        } catch (Exception $e) {
+            $this->logger->warning('PPTX ZIP extraction failed', ['error' => $e->getMessage()]);
+        }
+        
+        return "# PowerPoint Presentation\n\nPowerPoint parsing not available. Install phpoffice/phppresentation for full PPTX support.";
+    }
+    
+    private function extractPptxWithZip($filePath) {
+        if (!class_exists('ZipArchive')) {
+            throw new Exception('ZipArchive not available');
+        }
+        
+        $zip = new \ZipArchive();
+        if ($zip->open($filePath) !== TRUE) {
+            throw new Exception('Cannot open PPTX file');
+        }
+        
+        $content = "# PowerPoint Presentation\n\n";
+        
+        // Extract slide content from XML files
+        for ($i = 1; $i <= 50; $i++) { // Check up to 50 slides
+            $slideXml = $zip->getFromName("ppt/slides/slide{$i}.xml");
+            if ($slideXml === false) {
+                break; // No more slides
+            }
+            
+            $content .= "## Slide " . $i . "\n\n";
+            
+            // Parse XML to extract text content
+            try {
+                $dom = new \DOMDocument();
+                $dom->loadXML($slideXml);
+                $xpath = new \DOMXPath($dom);
+                
+                // Extract text from text nodes
+                $textNodes = $xpath->query('//a:t', $dom);
+                foreach ($textNodes as $textNode) {
+                    $text = trim($textNode->textContent);
+                    if (!empty($text)) {
+                        $content .= $text . "\n";
+                    }
+                }
+                $content .= "\n";
+                
+            } catch (Exception $e) {
+                $content .= "Error parsing slide content\n\n";
+            }
+        }
+        
+        $zip->close();
+        
+        if (strlen($content) <= 50) { // Only header
+            $content .= "No readable text content found in presentation.";
+        }
+        
+        return $content;
     }
     
     private function extractMetadata($fileName, $fileSize) {
@@ -261,19 +360,67 @@ class FileManager {
             'extension' => $extension,
             'size' => $fileSize,
             'type' => $this->getFileType($extension),
-            'searchable' => in_array($extension, ['txt', 'md', 'pdf', 'docx']),
+            'searchable' => in_array($extension, [
+                // PDF files
+                'pdf',
+                // Word documents  
+                'doc', 'docx',
+                // Excel spreadsheets
+                'xls', 'xlsx', 
+                // PowerPoint presentations
+                'ppt', 'pptx',
+                // Text files
+                'txt', 'md', 'markdown', 'csv', 'json', 'xml', 'log', 'conf', 'config', 
+                'ini', 'properties', 'html', 'htm', 'css', 'js', 'ts', 'php', 'py', 
+                'sql', 'yaml', 'yml', 'toml', 'rtf', 'bat', 'sh'
+            ]),
             'keywords' => $this->extractKeywords($fileName)
         ];
     }
     
     private function getFileType($extension) {
         $types = [
+            // PDF files
             'pdf' => 'document',
+            
+            // Word documents
+            'doc' => 'document',
             'docx' => 'document',
+            
+            // Excel spreadsheets  
+            'xls' => 'spreadsheet',
+            'xlsx' => 'spreadsheet',
+            
+            // PowerPoint presentations
+            'ppt' => 'presentation',
+            'pptx' => 'presentation',
+            
+            // Text files
             'txt' => 'text',
             'md' => 'markdown',
-            'xlsx' => 'spreadsheet',
-            'pptx' => 'presentation'
+            'markdown' => 'markdown',
+            'csv' => 'data',
+            'json' => 'data',
+            'xml' => 'data',
+            'log' => 'log',
+            'conf' => 'config',
+            'config' => 'config',
+            'ini' => 'config',
+            'properties' => 'config',
+            'html' => 'web',
+            'htm' => 'web',
+            'css' => 'web',
+            'js' => 'code',
+            'ts' => 'code',
+            'php' => 'code',
+            'py' => 'code',
+            'sql' => 'database',
+            'yaml' => 'config',
+            'yml' => 'config',
+            'toml' => 'config',
+            'rtf' => 'text',
+            'bat' => 'script',
+            'sh' => 'script'
         ];
         
         return $types[$extension] ?? 'unknown';
@@ -309,19 +456,41 @@ class FileManager {
     }
     
     public function deleteFile($fileId) {
+        // Validate file ID
+        if (!$fileId || !is_numeric($fileId)) {
+            throw new Exception('Invalid file ID');
+        }
+        
         $file = $this->getFile($fileId);
         if (!$file) {
             throw new Exception('File not found');
         }
         
-        // Only delete from database - no physical files to remove
-        $sql = "DELETE FROM files WHERE id = ?";
-        $this->db->query($sql, [$fileId]);
-        
-        $this->logger->info('File record deleted', [
-            'file_id' => $fileId,
-            'original_name' => $file['original_name']
-        ]);
+        try {
+            // Delete related records first (message_files)
+            $sql = "DELETE FROM message_files WHERE file_id = ?";
+            $this->db->query($sql, [$fileId]);
+            
+            // Delete the file record
+            $sql = "DELETE FROM files WHERE id = ?";
+            $result = $this->db->query($sql, [$fileId]);
+            
+            if ($result === false) {
+                throw new Exception('Database deletion failed');
+            }
+            
+            $this->logger->info('File record deleted', [
+                'file_id' => $fileId,
+                'original_name' => $file['original_name']
+            ]);
+            
+        } catch (Exception $e) {
+            $this->logger->error('File deletion error', [
+                'file_id' => $fileId,
+                'error' => $e->getMessage()
+            ]);
+            throw new Exception('Failed to delete file: ' . $e->getMessage());
+        }
     }
     
     public function attachFileToMessage($messageId, $fileId) {

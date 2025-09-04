@@ -24,6 +24,7 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 - PDO SQLite extension
 - cURL extension  
 - JSON extension
+- Composer (for Office document parsing libraries)
 - Write permissions for directories
 
 ### Step-by-Step Installation
@@ -41,26 +42,35 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
    cd /var/www/html/chotgpt2/
    ```
 
-3. **Set permissions**
+3. **Install Office document parsing libraries**
+   ```bash
+   # Install Composer if not already installed
+   curl -sS https://getcomposer.org/installer | php
+   
+   # Install required libraries for PDF, Word, Excel, PowerPoint parsing
+   php composer.phar require smalot/pdfparser phpoffice/phpword phpoffice/phpspreadsheet phpoffice/phppresentation
+   ```
+
+4. **Set permissions**
    ```bash
    sudo chmod 755 /var/www/html/chotgpt2/
    sudo chown -R www-data:www-data /var/www/html/chotgpt2/
    ```
 
-4. **Access the web setup**
+5. **Access the web setup**
    - Open your browser and navigate to: `http://your-domain.com/chotgpt2/`
    - The setup wizard will automatically appear
 
 ![install](assets/install.png)
 
 
-5. **Complete the web setup**
+6. **Complete the web setup**
    - Enter administrator username and password
    - Input your OpenAI API key (get one from [OpenAI API Keys](https://platform.openai.com/api-keys))
    - Set base URL (optional, e.g., `/chotgpt2`)
    - Click "Install"
 
-6. **Security cleanup**
+7. **Security cleanup**
    - After successful setup, delete `setup.php` for security:
    ```bash
    rm setup.php
@@ -88,10 +98,18 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 
 ### File Attachments
 1. Click the 📎 attachment button or "Files" button
-2. Upload files (PDF, Word, Excel, PowerPoint, Text, Markdown, **CSV**)
+2. Upload files from supported formats (see table below)
 3. Files are automatically processed and converted to searchable content
-   - **CSV files are converted to Markdown tables** for better AI context
 4. Send messages with file context
+
+#### Supported File Formats
+| File Format | Extensions | Conversion Method | Output Format |
+|-------------|------------|-------------------|---------------|
+| **PDF** | .pdf | smalot/pdfparser text extraction | `# PDF Content\n\n[Text content]` |
+| **Word Document** | .doc, .docx | phpoffice/phpword structured text extraction | `# Word Document\n\n[Section content]` |
+| **Excel Spreadsheet** | .xls, .xlsx | phpoffice/phpspreadsheet worksheet→table format | `# Excel Spreadsheet\n\n## [Sheet name]\n[Markdown table]` |
+| **PowerPoint Presentation** | .ppt, .pptx | phpoffice/phppresentation + ZIP fallback | `# PowerPoint Presentation\n\n## Slide 1\n[Slide content]` |
+| **Text Files** | .txt, .md, .csv, .json, .xml, .log, .html, .css, .js, .php, .py, .sql, .yaml, .ini, .sh, etc. | Direct reading or built-in parsers | Content as-is or formatted tables |
 
 ### Rich Content Rendering
 1. **Markdown Support**: Full GitHub Flavored Markdown with syntax highlighting
@@ -204,6 +222,7 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 - PDO SQLite拡張
 - cURL拡張
 - JSON拡張
+- Composer（Officeドキュメント解析ライブラリ用）
 - ディレクトリの書き込み権限
 
 ### ステップバイステップのインストール方法
@@ -221,23 +240,32 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
    cd /var/www/html/chotgpt2/
    ```
 
-3. **権限設定**
+3. **Officeドキュメント解析ライブラリのインストール**
+   ```bash
+   # Composerがインストールされていない場合はインストール
+   curl -sS https://getcomposer.org/installer | php
+   
+   # PDF、Word、Excel、PowerPoint解析用の必要ライブラリをインストール
+   php composer.phar require smalot/pdfparser phpoffice/phpword phpoffice/phpspreadsheet phpoffice/phppresentation
+   ```
+
+4. **権限設定**
    ```bash
    sudo chmod 755 /var/www/html/chotgpt2/
    sudo chown -R www-data:www-data /var/www/html/chotgpt2/
    ```
 
-4. **Webセットアップにアクセス**
+5. **Webセットアップにアクセス**
    - ブラウザで `http://your-domain.com/chotgpt2/` にアクセス
    - セットアップウィザードが自動的に表示されます
 
-5. **Webセットアップを完了**
+6. **Webセットアップを完了**
    - 管理者ユーザー名とパスワードを入力
    - OpenAI APIキーを入力（[OpenAI API Keys](https://platform.openai.com/api-keys)から取得）
    - ベースURLを設定（オプション、例：`/chotgpt2`）
    - 「インストール」をクリック
 
-6. **セキュリティクリーンアップ**
+7. **セキュリティクリーンアップ**
    - セットアップ完了後、セキュリティのため`setup.php`を削除：
    ```bash
    rm setup.php
@@ -265,10 +293,18 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 
 ### ファイル添付
 1. 📎添付ボタンまたは「ファイル」ボタンをクリック
-2. ファイルをアップロード（PDF、Word、Excel、PowerPoint、テキスト、Markdown、**CSV**）
+2. サポートされている形式のファイルをアップロード（下表参照）
 3. ファイルは自動的に処理され、検索可能なコンテンツに変換されます
-   - **CSVファイルはMarkdownテーブルに変換**され、AIがより理解しやすい形式になります
 4. ファイルコンテキスト付きでメッセージを送信
+
+#### サポートファイル形式
+| ファイル形式 | 拡張子 | 変換方式 | 出力形式 |
+|-------------|--------|----------|----------|
+| **PDF** | .pdf | smalot/pdfparser でテキスト抽出 | `# PDF Content\n\n[テキスト内容]` |
+| **Word文書** | .doc, .docx | phpoffice/phpword で構造化テキスト抽出 | `# Word Document\n\n[セクション内容]` |
+| **Excelスプレッドシート** | .xls, .xlsx | phpoffice/phpspreadsheet でワークシート→表形式 | `# Excel Spreadsheet\n\n## [シート名]\n[Markdown表]` |
+| **PowerPointプレゼンテーション** | .ppt, .pptx | phpoffice/phppresentation + ZIPフォールバック | `# PowerPoint Presentation\n\n## Slide 1\n[スライド内容]` |
+| **テキストファイル** | .txt, .md, .csv, .json, .xml, .log, .html, .css, .js, .php, .py, .sql, .yaml, .ini, .sh など | 直接読み込みまたは内蔵パーサー | そのまままたは整形された表 |
 
 ### リッチコンテンツレンダリング
 1. **Markdownサポート**: シンタックスハイライト付きの完全なGitHub Flavored Markdown

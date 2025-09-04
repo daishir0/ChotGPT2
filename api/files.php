@@ -55,7 +55,12 @@ try {
             break;
             
         case 'delete':
-            handleDelete($fileManager, $auth, $_POST);
+            // Support both POST (with CSRF) and DELETE (without CSRF for file manager)
+            if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+                handleDeleteFile($fileManager, $_GET);
+            } else {
+                handleDelete($fileManager, $auth, $_POST);
+            }
             break;
             
         default:
@@ -123,10 +128,11 @@ function handleList($fileManager, $params) {
         ];
     }, $files);
     
-    // Filter out files without meaningful content (like unsupported formats)
-    $formattedFiles = array_filter($formattedFiles, function($file) {
-        return $file['has_meaningful_content'];
-    });
+    // Keep all files in file manager list - filtering only applies to chat usage
+    // Note: Files without meaningful content won't be useful for chat, but should be visible in file manager
+    // $formattedFiles = array_filter($formattedFiles, function($file) {
+    //     return $file['has_meaningful_content'];
+    // });
     
     // Remove the has_meaningful_content flag from the response
     $formattedFiles = array_map(function($file) {
@@ -245,6 +251,29 @@ function handleDelete($fileManager, $auth, $data) {
     $fileManager->deleteFile($fileId);
     
     echo json_encode(['success' => true]);
+}
+
+function handleDeleteFile($fileManager, $params) {
+    $fileId = $params['id'] ?? null;
+    
+    if (!$fileId) {
+        throw new Exception('File ID required');
+    }
+    
+    try {
+        $fileManager->deleteFile($fileId);
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        // Log detailed error
+        if (isset($fileManager) && method_exists($fileManager, 'logger')) {
+            $fileManager->logger->error('File deletion failed', [
+                'file_id' => $fileId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+        throw $e;
+    }
 }
 
 function hasMeaningfulContent($content) {
