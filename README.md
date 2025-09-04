@@ -1,7 +1,7 @@
 # ChotGPT2
 
 ## Overview
-ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, **comprehensive Markdown rendering with LaTeX math support**, **complete Mermaid diagram visualization**, and **responsive design** for seamless cross-platform usage.
+ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and **dynamic AI model switching with GPT-5 series support**. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, **comprehensive Markdown rendering with LaTeX math support**, **complete Mermaid diagram visualization**, **intelligent model management system**, and **responsive design** for seamless cross-platform usage.
 
 ### 🚀 BREAKTHROUGH INNOVATION: Thread-Specific AI Personas
 **ChotGPT2 introduces the world's first thread-specific AI persona system** - a revolutionary feature that no other AI chat application offers:
@@ -83,7 +83,11 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 2. Type your message and press Enter or click Send
    - **PC**: Enter sends message, Shift+Enter creates new line
    - **Mobile**: Enter creates new line, use Send button to send
-3. The AI will respond based on your selected model
+3. The AI will respond using **GPT-5 Mini by default** (optimal balance of performance and cost)
+4. Switch models anytime through Settings for different capabilities:
+   - **GPT-5**: For complex reasoning and advanced coding tasks
+   - **GPT-5 Nano**: For quick responses to simple questions
+   - **GPT-4o Mini**: For legacy compatibility
 
 ### Thread Management
 1. **Search Threads**: Use the 🔍 search box above the thread list
@@ -152,16 +156,28 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 
 ### Settings Configuration
 - Click ⚙️ "Settings" to access configuration
-- Switch between AI models (GPT-4o Mini, GPT-4, etc.)
-- Adjust system prompts
+- **Dynamic Model Selection**: Switch between the latest AI models with automatic detection:
+  - **GPT-5 Mini (Default)**: Perfect balance of performance and cost
+  - **GPT-5**: Most capable model for advanced reasoning and coding
+  - **GPT-5 Nano**: Ultra-fast responses for basic tasks
+  - **GPT-4o Mini**: Legacy support for existing workflows
+- **Intelligent Model Management**: Model options are automatically populated from the server configuration
+- Adjust system prompts with per-thread persona support
 - Configure context compression settings
-- Change themes
+- Change themes between dark and light modes
 
 ### File Management
 - View all uploaded files in the Files section
 - Search through file contents
 - Delete unnecessary files
 - Files are automatically processed for AI context
+
+### Dynamic Model Management
+- **Automatic Model Detection**: Available AI models are dynamically loaded from server configuration
+- **Latest Model Support**: Immediate access to new OpenAI models without system updates
+- **Model Metadata**: View pricing, capabilities, and performance characteristics for each model
+- **Intelligent Defaults**: System automatically selects optimal model (GPT-5 Mini) for new users
+- **Fallback Handling**: Graceful degradation if model services are temporarily unavailable
 
 ## Notes
 
@@ -203,7 +219,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 # ChotGPT2
 
 ## 概要
-ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**LaTeX数式対応の包括的Markdownレンダリング**、**完全なMermaid図表可視化**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
+ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、**GPT-5シリーズサポートによる動的AIモデル切り替え機能**を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**LaTeX数式対応の包括的Markdownレンダリング**、**完全なMermaid図表可視化**、**インテリジェントモデル管理システム**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
 
 ### 🚀 画期的イノベーション：スレッド固有AIペルソナ
 **ChotGPT2は世界初のスレッド固有AIペルソナシステムを導入** - 他のAIチャットアプリケーションにはない革新的機能：
@@ -278,7 +294,11 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 2. メッセージを入力してEnterキーまたは送信ボタンをクリック
    - **PC**: Enterでメッセージ送信、Shift+Enterで改行
    - **スマホ**: Enterで改行、送信ボタンでメッセージ送信
-3. 選択したモデルに基づいてAIが応答します
+3. AIは**デフォルトでGPT-5 Miniを使用して応答**（パフォーマンスとコストの最適バランス）
+4. 異なる機能のために設定でいつでもモデルを切り替え:
+   - **GPT-5**: 複雑な推論と高度なコーディングタスク用
+   - **GPT-5 Nano**: 簡単な質問への迅速応答用
+   - **GPT-4o Mini**: レガシー互換性用
 
 ### スレッド管理
 1. **スレッド検索**: スレッド一覧上の🔍検索ボックスを使用
@@ -340,16 +360,28 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 
 ### 設定の構成
 - ⚙️「設定」をクリックして設定にアクセス
-- AIモデルの切り替え（GPT-4o Mini、GPT-4など）
-- システムプロンプトの調整
+- **動的モデル選択**: 自動検出による最新AIモデル間の切り替え:
+  - **GPT-5 Mini（デフォルト）**: パフォーマンスとコストの完璧なバランス
+  - **GPT-5**: 高度な推論とコーディングに最適な最高性能モデル
+  - **GPT-5 Nano**: 基本的なタスクのための超高速レスポンス
+  - **GPT-4o Mini**: 既存ワークフローのためのレガシーサポート
+- **インテリジェントモデル管理**: モデル選択肢はサーバー設定から自動的に取得
+- スレッド別ペルソナサポート付きのシステムプロンプト調整
 - コンテキスト圧縮設定の構成
-- テーマの変更
+- ダークモードとライトモード間のテーマ変更
 
 ### ファイル管理
 - ファイルセクションでアップロードされたすべてのファイルを表示
 - ファイルコンテンツを検索
 - 不要なファイルを削除
 - ファイルはAIコンテキスト用に自動処理されます
+
+### 動的モデル管理
+- **自動モデル検出**: 利用可能なAIモデルはサーバー設定から動的に読み込み
+- **最新モデルサポート**: システム更新なしで新しいOpenAIモデルへの即座のアクセス
+- **モデルメタデータ**: 各モデルの価格、機能、性能特性を表示
+- **インテリジェントデフォルト**: システムが新規ユーザーに最適なモデル（GPT-5 Mini）を自動選択
+- **フォールバック処理**: モデルサービスが一時的に利用できない場合の優雅な劣化対応
 
 ## 注意点
 
