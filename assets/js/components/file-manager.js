@@ -583,8 +583,7 @@ class FileManager {
                 <span class="file-meta">${this.formatFileSize(file.file_size)} • ${this.formatDate(file.created_at)}</span>
             </div>
             <div class="file-actions">
-                <button class="action-btn" onclick="fileManager.previewFile(${file.id})" title="プレビュー">👁️</button>
-                <button class="action-btn" onclick="fileManager.downloadFile(${file.id})" title="ダウンロード">⬇️</button>
+                <button class="action-btn" onclick="fileManager.copyFileContent(${file.id})" title="クリップボードにコピー">📋</button>
                 <button class="action-btn delete" onclick="fileManager.deleteFile(${file.id})" title="削除">🗑️</button>
             </div>
         `;
@@ -610,8 +609,7 @@ class FileManager {
                 </div>
             </div>
             <div class="file-actions">
-                <button class="action-btn" onclick="fileManager.previewFile(${file.id})" title="プレビュー">👁️</button>
-                <button class="action-btn" onclick="fileManager.downloadFile(${file.id})" title="ダウンロード">⬇️</button>
+                <button class="action-btn" onclick="fileManager.copyFileContent(${file.id})" title="クリップボードにコピー">📋</button>
                 <button class="action-btn delete" onclick="fileManager.deleteFile(${file.id})" title="削除">🗑️</button>
             </div>
         `;
@@ -771,13 +769,96 @@ class FileManager {
         }
     }
     
-    previewFile(fileId) {
-        // File preview functionality - could open in new tab or modal
-        const file = this.allFiles.find(f => f.id === fileId);
-        if (!file) return;
+    /**
+     * ファイル内容をクリップボードにコピー
+     */
+    async copyFileContent(fileId) {
+        try {
+            const file = this.allFiles.find(f => f.id === fileId);
+            if (!file) {
+                this.showToast('ファイルが見つかりません', 'error');
+                return;
+            }
+            
+            // ファイルの内容を取得
+            let content = '';
+            if (file.content_markdown && file.content_markdown.trim()) {
+                content = file.content_markdown;
+            } else {
+                // APIからコンテンツを取得
+                const response = await this.authenticatedFetch(`${this.apiBaseUrl}/files.php?action=get&id=${fileId}`);
+                const data = await response.json();
+                if (data.success && data.file && data.file.content_markdown) {
+                    content = data.file.content_markdown;
+                } else {
+                    this.showToast('ファイル内容を取得できませんでした', 'error');
+                    return;
+                }
+            }
+            
+            // クリップボードにコピー
+            await this.copyTextToClipboard(content);
+            this.showCopyFeedback(fileId);
+            this.showToast('ファイル内容をクリップボードにコピーしました', 'success');
+            
+        } catch (error) {
+            console.error('Copy file content error:', error);
+            this.showToast('コピーに失敗しました', 'error');
+        }
+    }
+    
+    /**
+     * テキストをクリップボードにコピー（message-actions.jsから参考）
+     */
+    async copyTextToClipboard(text) {
+        console.log('Copying text to clipboard, length:', text.length);
         
-        const url = `${this.apiBaseUrl}/files.php?action=download&id=${fileId}`;
-        window.open(url, '_blank');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            console.log('Using modern clipboard API');
+            await navigator.clipboard.writeText(text);
+        } else {
+            console.log('Using fallback clipboard method');
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (!successful) {
+                throw new Error('Fallback copy command failed');
+            }
+        }
+        
+        console.log('Copy successful');
+    }
+    
+    /**
+     * コピー成功のフィードバック表示
+     */
+    showCopyFeedback(fileId) {
+        const button = document.querySelector(`[onclick="fileManager.copyFileContent(${fileId})"]`);
+        if (button) {
+            const originalText = button.textContent;
+            const originalTitle = button.title;
+            
+            // 一時的に成功表示
+            button.textContent = '✅';
+            button.title = 'コピーしました！';
+            button.classList.add('copy-success');
+            
+            // 2秒後に元に戻す
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.title = originalTitle;
+                button.classList.remove('copy-success');
+            }, 2000);
+        }
     }
     
     // Utility methods
