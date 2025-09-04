@@ -114,7 +114,7 @@ class SettingsManager {
     public function resetToDefaults() {
         try {
             $defaults = [
-                'default_model' => 'gpt-4o-mini',
+                'default_model' => 'gpt-5-mini',
                 'system_prompt' => 'You are a helpful assistant.',
                 'theme' => 'dark'
             ];
@@ -135,6 +135,51 @@ class SettingsManager {
     }
     
     /**
+     * 利用可能なモデル一覧を取得
+     */
+    private function getAllowedModels() {
+        try {
+            // models.phpから動的にモデル一覧を取得
+            $modelsPath = __DIR__ . '/../api/models.php';
+            
+            // models.phpの内容を一時的に取得
+            ob_start();
+            $_SERVER['PHP_AUTH_USER'] = 'temp';
+            $_SERVER['PHP_AUTH_PW'] = 'temp';
+            
+            // 認証をバイパスしてモデル定義部分のみ実行
+            $modelsCode = file_get_contents($modelsPath);
+            
+            // モデル定義配列を抽出（正規表現で$models配列を取得）
+            if (preg_match('/\$models\s*=\s*(\[[^;]+\]);/s', $modelsCode, $matches)) {
+                eval('$models = ' . $matches[1] . ';');
+                
+                $allowedModels = [];
+                foreach ($models as $model) {
+                    if (isset($model['enabled']) && $model['enabled']) {
+                        $allowedModels[] = $model['id'];
+                    }
+                }
+                
+                ob_end_clean();
+                return $allowedModels;
+            }
+            
+            ob_end_clean();
+            
+            // フォールバック: デフォルトモデル
+            return ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4o-mini'];
+            
+        } catch (Exception $e) {
+            if ($this->logger) {
+                $this->logger->warning('Failed to get models dynamically, using fallback', ['error' => $e->getMessage()]);
+            }
+            // エラー時のフォールバック
+            return ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4o-mini'];
+        }
+    }
+    
+    /**
      * 設定値の検証
      */
     private function validateSetting($key, $value) {
@@ -149,9 +194,9 @@ class SettingsManager {
                 break;
                 
             case 'default_model':
-                $allowedModels = ['gpt-4o-mini', 'gpt-4', 'gpt-3.5-turbo'];
+                $allowedModels = $this->getAllowedModels();
                 if (!in_array($value, $allowedModels)) {
-                    throw new InvalidArgumentException('Invalid model: ' . $value);
+                    throw new InvalidArgumentException('Invalid model: ' . $value . '. Allowed models: ' . implode(', ', $allowedModels));
                 }
                 break;
                 

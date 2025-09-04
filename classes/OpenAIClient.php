@@ -49,10 +49,18 @@ class OpenAIClient {
         
         $data = [
             'model' => $model,
-            'messages' => $formattedMessages,
-            'max_tokens' => $this->config['openai']['max_tokens'],
-            'temperature' => $this->config['openai']['temperature']
+            'messages' => $formattedMessages
         ];
+        
+        // GPT-5シリーズでは max_completion_tokens と temperature=1 (デフォルト), 他のモデルでは max_tokens と設定値 を使用
+        if (strpos($model, 'gpt-5') === 0) {
+            $data['max_completion_tokens'] = $this->config['openai']['max_tokens'];
+            // GPT-5シリーズではtemperature=1のみサポート（デフォルト値なので省略）
+            // $data['temperature'] = 1; // デフォルト値なので設定不要
+        } else {
+            $data['max_tokens'] = $this->config['openai']['max_tokens'];
+            $data['temperature'] = $this->config['openai']['temperature'];
+        }
         
         $this->logger->info('OpenAI API Request', [
             'model' => $model,
@@ -66,11 +74,29 @@ class OpenAIClient {
             throw new Exception('OpenAI API Error: ' . $response['error']['message']);
         }
         
+        // デバッグ: レスポンス構造をログに記録
+        $this->logger->info('OpenAI API Full Response', [
+            'model' => $model,
+            'response_structure' => json_encode($response, JSON_PRETTY_PRINT),
+            'choices_count' => count($response['choices'] ?? []),
+            'first_choice' => $response['choices'][0] ?? null
+        ]);
+        
         $content = $response['choices'][0]['message']['content'] ?? '';
+        
+        // GPT-5シリーズでは構造が異なる可能性があるため、複数の場所をチェック
+        if (empty($content) && strpos($model, 'gpt-5') === 0) {
+            // GPT-5シリーズでの代替的なコンテンツ取得方法
+            $content = $response['choices'][0]['message']['reasoning'] ?? 
+                      $response['choices'][0]['content'] ?? 
+                      $response['content'] ?? '';
+        }
         
         $this->logger->info('OpenAI API Response', [
             'tokens_used' => $response['usage']['total_tokens'] ?? 0,
-            'response_length' => strlen($content)
+            'response_length' => strlen($content),
+            'reasoning_tokens' => $response['usage']['completion_tokens_details']['reasoning_tokens'] ?? 0,
+            'final_content' => substr($content, 0, 100) . (strlen($content) > 100 ? '...' : '')
         ]);
         
         return [

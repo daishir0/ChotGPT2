@@ -331,9 +331,7 @@ $csrfToken = $auth->generateCSRFToken();
                     <div class="setting-group">
                         <label for="modelSelect">AIモデル</label>
                         <select id="modelSelect">
-                            <option value="gpt-4o-mini">GPT-4o Mini (Multimodal)</option>
-                            <option value="gpt-4">GPT-4 (Advanced)</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
+                            <!-- モデル選択肢はJavaScriptで動的に生成されます -->
                         </select>
                     </div>
                     

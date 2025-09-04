@@ -4,11 +4,73 @@ class SettingsManager {
     constructor(app) {
         this.app = app;
         this.settings = {
-            model: 'gpt-4o-mini',
+            model: 'gpt-5-mini',
             systemPrompt: 'You are a helpful assistant.',
             theme: 'dark'
         };
+        this.availableModels = [];
         this.messageRenderer = null; // Will be set by app
+    }
+    
+    /**
+     * 利用可能なモデル一覧を読み込む
+     */
+    async loadAvailableModels() {
+        try {
+            const response = await this.app.apiClient.authenticatedFetch(`${this.app.apiClient.apiBaseUrl}/models.php`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.availableModels = data.models;
+                this.renderModelSelect();
+            } else {
+                console.error('Failed to load models:', data.error);
+                // フォールバック
+                this.availableModels = [
+                    { id: 'gpt-5', name: 'GPT-5 (Full Model)', description: 'Most capable model', category: 'premium', enabled: true },
+                    { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Perfect balance', category: 'standard', enabled: true, default: true },
+                    { id: 'gpt-5-nano', name: 'GPT-5 Nano (Ultra-Fast)', description: 'Ultra-low-latency', category: 'basic', enabled: true },
+                    { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Legacy)', description: 'Previous generation', category: 'legacy', enabled: true }
+                ];
+                this.renderModelSelect();
+            }
+        } catch (error) {
+            console.error('Error loading models:', error);
+            // フォールバック
+            this.availableModels = [
+                { id: 'gpt-5', name: 'GPT-5 (Full Model)', description: 'Most capable model', category: 'premium', enabled: true },
+                { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Perfect balance', category: 'standard', enabled: true, default: true },
+                { id: 'gpt-5-nano', name: 'GPT-5 Nano (Ultra-Fast)', description: 'Ultra-low-latency', category: 'basic', enabled: true },
+                { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Legacy)', description: 'Previous generation', category: 'legacy', enabled: true }
+            ];
+            this.renderModelSelect();
+        }
+    }
+    
+    /**
+     * モデル選択肢を動的に生成
+     */
+    renderModelSelect() {
+        const modelSelect = document.getElementById('modelSelect');
+        if (!modelSelect) return;
+        
+        modelSelect.innerHTML = '';
+        
+        // 有効なモデルのみ表示
+        const enabledModels = this.availableModels.filter(model => model.enabled);
+        
+        enabledModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            
+            // 説明があれば追加
+            if (model.description) {
+                option.title = model.description;
+            }
+            
+            modelSelect.appendChild(option);
+        });
     }
     
     /**
@@ -16,6 +78,9 @@ class SettingsManager {
      */
     async loadSettings() {
         try {
+            // Load available models first
+            await this.loadAvailableModels();
+            
             // Load settings from server
             const data = await this.app.apiClient.getSettings();
             
@@ -25,7 +90,7 @@ class SettingsManager {
                 console.error('Failed to load settings:', data.error);
                 // Use default settings if server fails
                 this.settings = {
-                    model: 'gpt-4o-mini',
+                    model: 'gpt-5-mini',
                     systemPrompt: 'You are a helpful assistant.',
                     theme: 'dark'
                 };
@@ -34,7 +99,7 @@ class SettingsManager {
             console.error('Settings load error:', error);
             // Use default settings on error
             this.settings = {
-                model: 'gpt-4o-mini',
+                model: 'gpt-5-mini',
                 systemPrompt: 'You are a helpful assistant.',
                 theme: 'dark'
             };

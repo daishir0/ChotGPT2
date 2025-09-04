@@ -22,7 +22,7 @@ return [
     // OpenAI API設定
     'openai' => [
         'api_key' => 'your_openai_api_key_here',
-        'default_model' => 'gpt-4o-mini',
+        'default_model' => 'gpt-5-mini',
         'max_tokens' => 2000,
         'temperature' => 0.7,
         // コンテキスト圧縮設定
