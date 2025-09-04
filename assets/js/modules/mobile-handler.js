@@ -64,6 +64,11 @@ class MobileHandler {
             let tapTimeout;
             
             element.addEventListener('touchstart', function(event) {
+                // テーブル要素内のタッチは除外
+                if (event.target.closest('.table-wrapper, table')) {
+                    return;
+                }
+                
                 tapCount++;
                 if (tapCount === 1) {
                     tapTimeout = setTimeout(function() {
@@ -87,6 +92,11 @@ class MobileHandler {
         let tapTimeout;
         
         element.addEventListener('touchstart', function(event) {
+            // テーブル要素内のタッチは除外
+            if (event.target.closest('.table-wrapper, table')) {
+                return;
+            }
+            
             tapCount++;
             if (tapCount === 1) {
                 tapTimeout = setTimeout(function() {
