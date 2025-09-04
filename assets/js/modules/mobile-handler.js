@@ -140,18 +140,38 @@ class MobileHandler {
         };
         
         // タッチデバイスでのタップイベント
+        let touchStartY = 0;
+        let touchMoved = false;
+        
         messageElement.addEventListener('touchstart', (e) => {
             // アクションボタンのクリックは除外
             if (e.target.closest('.message-action-btn, .message-actions')) {
                 return;
             }
             
-            // メッセージ本体をタップした場合のみアクション表示
-            if (e.target.closest('.message-content') || e.target.closest('.message-text')) {
-                e.preventDefault();
+            // タッチ開始位置を記録
+            touchStartY = e.touches[0].clientY;
+            touchMoved = false;
+        }, { passive: true });
+        
+        messageElement.addEventListener('touchmove', (e) => {
+            // スクロールが発生したかチェック
+            if (Math.abs(e.touches[0].clientY - touchStartY) > 10) {
+                touchMoved = true;
+            }
+        }, { passive: true });
+        
+        messageElement.addEventListener('touchend', (e) => {
+            // アクションボタンのクリックは除外
+            if (e.target.closest('.message-action-btn, .message-actions')) {
+                return;
+            }
+            
+            // メッセージ本体をタップして、スクロールしていない場合のみアクション表示
+            if (!touchMoved && (e.target.closest('.message-content') || e.target.closest('.message-text'))) {
                 toggleActions();
             }
-        }, { passive: false });
+        }, { passive: true });
         
         // 非タッチデバイス（PC）でのクリック
         messageElement.addEventListener('click', (e) => {

@@ -181,7 +181,7 @@ body {
     text-align: left;
     min-width: 0;
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-    touch-action: manipulation; /* Disable 300ms delay */
+    touch-action: pan-y; /* Disable 300ms delay */
 }
 
 .thread-actions {
@@ -456,7 +456,7 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
-    touch-action: manipulation;
+    touch-action: pan-y;
 }
 
 .welcome-message {
@@ -498,7 +498,7 @@ body {
     padding: 16px;
     border-radius: var(--radius);
     position: relative;
-    touch-action: manipulation;
+    touch-action: pan-y;
     user-select: text;
 }
 
@@ -1073,7 +1073,7 @@ body {
 * {
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    touch-action: pan-y;
 }
 
 /* Specific elements that need stronger zoom prevention */
@@ -1085,7 +1085,7 @@ html,
 .message,
 .message-content,
 .message-text {
-    touch-action: manipulation;
+    touch-action: pan-y;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
