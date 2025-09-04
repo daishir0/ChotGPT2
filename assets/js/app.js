@@ -32,15 +32,24 @@ class MessageRenderer {
         if (typeof katex !== 'undefined') {
             console.log('KaTeX initialized successfully');
         }
+        
+        // Mermaid初期化
+        if (typeof mermaid !== 'undefined') {
+            this.initializeMermaidTheme();
+            console.log('Mermaid initialized successfully');
+        }
     }
     
-    renderMessage(content) {
+    async renderMessage(content) {
         if (!content) return '';
         
         try {
-            // 数式を含むかどうかもチェック
-            if (this.isMarkdownContent(content) || this.hasMathContent(content)) {
+            // 数式・図表を含むかどうかもチェック
+            if (this.isMarkdownContent(content) || this.hasMathContent(content) || this.hasMermaidContent(content)) {
                 let html;
+                
+                // Mermaidの前処理（数式より先に処理）
+                content = await this.preprocessMermaid(content);
                 
                 // 数式の前処理
                 content = this.preprocessMath(content);
@@ -50,6 +59,9 @@ class MessageRenderer {
                 
                 // テーブルをレスポンシブ対応に変換
                 html = this.makeTablesResponsive(html);
+                
+                // Mermaidの後処理
+                setTimeout(() => this.processMermaidDiagrams(), 100);
                 
                 return `<div class="markdown-content">${html}</div>`;
             } else {
@@ -77,6 +89,118 @@ class MessageRenderer {
         ];
         
         return mathPatterns.some(pattern => pattern.test(content));
+    }
+    
+    hasMermaidContent(content) {
+        const mermaidPatterns = [
+            /```mermaid[\s\S]*?```/i,       // コードブロック内のmermaid
+            /```graph[\s\S]*?```/i,        // graph記法
+            /```flowchart[\s\S]*?```/i,    // flowchart記法
+            /```sequence[\s\S]*?```/i,     // sequence記法
+            /```gantt[\s\S]*?```/i,        // gantt記法
+            /```pie[\s\S]*?```/i,          // pie記法
+            /```mindmap[\s\S]*?```/i,      // mindmap記法
+            /```stateDiagram[\s\S]*?```/i, // stateDiagram記法
+            /```state[\s\S]*?```/i,        // state記法（短縮形）
+            /```journey[\s\S]*?```/i,      // journey記法
+            /```gitgraph[\s\S]*?```/i      // gitgraph記法
+        ];
+        
+        return mermaidPatterns.some(pattern => pattern.test(content));
+    }
+    
+    initializeMermaidTheme() {
+        const isDark = document.body.classList.contains('dark-theme');
+        
+        const mermaidConfig = {
+            startOnLoad: false,
+            securityLevel: 'loose',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            theme: isDark ? 'dark' : 'default',
+            themeVariables: isDark ? {
+                // ダークモード用カスタムカラー
+                primaryColor: '#4a9eff',
+                primaryTextColor: '#ffffff',
+                primaryBorderColor: '#6b7280',
+                lineColor: '#9ca3af',
+                secondaryColor: '#374151',
+                tertiaryColor: '#1f2937',
+                background: '#111827',
+                mainBkg: '#1f2937',
+                secondBkg: '#374151',
+                tertiaryBkg: '#4b5563'
+            } : {
+                // ライトモード用カスタムカラー
+                primaryColor: '#4a9eff',
+                primaryTextColor: '#1f2937',
+                primaryBorderColor: '#d1d5db',
+                lineColor: '#6b7280',
+                secondaryColor: '#f3f4f6',
+                tertiaryColor: '#ffffff',
+                background: '#ffffff',
+                mainBkg: '#ffffff',
+                secondBkg: '#f9fafb',
+                tertiaryBkg: '#f3f4f6'
+            }
+        };
+        
+        mermaid.initialize(mermaidConfig);
+    }
+    
+    async preprocessMermaid(content) {
+        if (typeof mermaid === 'undefined') {
+            console.warn('Mermaid not available');
+            return content;
+        }
+        
+        try {
+            // Mermaidコードブロックをプレースホルダーに置換
+            let diagramCount = 0;
+            content = content.replace(/```(mermaid|graph|flowchart|sequence|gantt|pie|mindmap|stateDiagram|state|journey|gitgraph)\n([\s\S]*?)```/gi, (match, type, diagramCode) => {
+                const diagramId = `mermaid-diagram-${Date.now()}-${diagramCount++}`;
+                
+                // プレースホルダーを作成（後でSVGに置換される）
+                return `<div class="mermaid-container">
+                    <div class="mermaid" id="${diagramId}" data-diagram="${this.escapeHtml(diagramCode.trim())}">
+                        ${diagramCode.trim()}
+                    </div>
+                </div>`;
+            });
+            
+            return content;
+        } catch (error) {
+            console.warn('Mermaid preprocessing error:', error);
+            return content;
+        }
+    }
+    
+    async processMermaidDiagrams() {
+        if (typeof mermaid === 'undefined') return;
+        
+        // テーマが変更されている可能性があるので再初期化
+        this.initializeMermaidTheme();
+        
+        const diagrams = document.querySelectorAll('.mermaid:not(.mermaid-processed)');
+        
+        for (const diagram of diagrams) {
+            try {
+                const diagramCode = diagram.dataset.diagram || diagram.textContent;
+                
+                if (diagramCode.trim()) {
+                    // SVGを生成
+                    const { svg } = await mermaid.render(diagram.id + '-svg', diagramCode);
+                    diagram.innerHTML = svg;
+                    diagram.classList.add('mermaid-processed');
+                }
+            } catch (error) {
+                console.warn('Mermaid rendering error:', error);
+                diagram.innerHTML = `<div class="mermaid-error">
+                    <strong>図表レンダリングエラー:</strong><br>
+                    <code>${this.escapeHtml(error.message)}</code>
+                </div>`;
+                diagram.classList.add('mermaid-processed');
+            }
+        }
     }
     
     preprocessMath(content) {
@@ -189,7 +313,14 @@ class MessageRenderer {
             /\$[^$\n]+\$/,         // インライン数式
             /\\\[[\s\S]*?\\\]/,    // LaTeX ブロック数式
             /\\\([\s\S]*?\\\)/,    // LaTeX インライン数式
-            /\[[\s\S]*?\]/         // 簡略ブロック数式
+            /\[[\s\S]*?\]/,        // 簡略ブロック数式
+            /```mermaid[\s\S]*?```/i,      // Mermaid図表
+            /```graph[\s\S]*?```/i,       // Graph記法
+            /```flowchart[\s\S]*?```/i,   // Flowchart記法
+            /```stateDiagram[\s\S]*?```/i, // StateDiagram記法
+            /```state[\s\S]*?```/i,       // State記法
+            /```journey[\s\S]*?```/i,     // Journey記法
+            /```gitgraph[\s\S]*?```/i     // Gitgraph記法
         ];
         
         return markdownPatterns.some(pattern => pattern.test(content));
@@ -206,6 +337,7 @@ class ChotGPTApp {
     constructor() {
         this.currentThread = null;
         this.currentMessageId = null;
+        this.currentThreadMessages = []; // Store complete message tree for copy functionality
         this.selectedFiles = [];
         this.allThreads = []; // Store all threads for search
         this.filteredThreads = []; // Store filtered threads
@@ -552,6 +684,7 @@ class ChotGPTApp {
     selectThread(threadId, threadName) {
         this.currentThread = threadId;
         this.currentMessageId = null; // Reset message ID when switching threads
+        this.currentThreadMessages = []; // Reset message cache when switching threads
         
         // Close mobile menu if open
         if (window.innerWidth <= 768) {
@@ -582,6 +715,11 @@ class ChotGPTApp {
             
             if (data.success) {
                 console.log('Processing tree data...');
+                
+                // Store the complete message tree for copy functionality
+                this.currentThreadMessages = data.tree;
+                console.log('Stored currentThreadMessages:', this.currentThreadMessages.length, 'messages');
+                
                 // Get the path for current message instead of rendering entire tree
                 const messagePath = this.getMessagePath(data.tree);
                 console.log('Message path:', messagePath);
@@ -711,7 +849,7 @@ class ChotGPTApp {
         return null;
     }
     
-    renderMessagePath(messagePath) {
+    async renderMessagePath(messagePath) {
         const container = document.getElementById('messagesContainer');
         container.innerHTML = '';
         
@@ -727,19 +865,19 @@ class ChotGPTApp {
         
         let userMessageIndex = 0;
         
-        messagePath.forEach(message => {
+        for (const message of messagePath) {
             if (message.role === 'user') {
                 userMessageIndex++;
             }
             
-            const messageElement = this.createMessageElement(message, userMessageIndex);
+            const messageElement = await this.createMessageElement(message, userMessageIndex);
             container.appendChild(messageElement);
-        });
+        }
         
         container.scrollTop = container.scrollHeight;
     }
     
-    createMessageElement(message, userMessageIndex = 0) {
+    async createMessageElement(message, userMessageIndex = 0) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${message.role}`;
         messageDiv.dataset.messageId = message.id;
@@ -747,10 +885,10 @@ class ChotGPTApp {
         const avatar = message.role === 'user' ? 'U' : 'AI';
         const avatarClass = message.role === 'user' ? 'user' : 'assistant';
         
-        // アクションボタンはユーザーメッセージにのみ表示
-        // ただし、最初のユーザーメッセージ（userMessageIndex === 1）には分岐ボタンを表示しない
+        // アクションボタンの設定
         let actionsHTML = '';
         if (message.role === 'user') {
+            // ユーザーメッセージ: 編集・分岐・削除ボタン
             const showBranchButton = userMessageIndex > 1;
             actionsHTML = `
                 <div class="message-actions">
@@ -759,12 +897,21 @@ class ChotGPTApp {
                     <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="削除">🗑️</button>
                 </div>
             `;
+        } else if (message.role === 'assistant') {
+            // AIメッセージ: コピーボタンのみ
+            actionsHTML = `
+                <div class="message-actions ai-actions">
+                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="コピー">📋</button>
+                </div>
+            `;
         }
+        
+        const formattedContent = await this.formatMessageContent(message.content);
         
         messageDiv.innerHTML = `
             <div class="message-avatar ${avatarClass}">${avatar}</div>
             <div class="message-content">
-                <div class="message-text">${this.formatMessageContent(message.content)}</div>
+                <div class="message-text">${formattedContent}</div>
                 ${actionsHTML}
             </div>
         `;
@@ -772,11 +919,14 @@ class ChotGPTApp {
         // Add double-tap prevention to dynamically created messages
         this.addDoubleTabPreventionToElement(messageDiv);
         
+        // Add mobile tap interaction for showing action buttons
+        this.addMobileActionInteraction(messageDiv);
+        
         return messageDiv;
     }
     
-    formatMessageContent(content) {
-        return this.messageRenderer.renderMessage(content);
+    async formatMessageContent(content) {
+        return await this.messageRenderer.renderMessage(content);
     }
     
     async sendMessage() {
@@ -1360,6 +1510,363 @@ class ChotGPTApp {
     
     applyTheme() {
         document.body.className = this.settings.theme + '-theme';
+        
+        // Mermaidテーマも更新
+        if (typeof mermaid !== 'undefined' && this.messageRenderer) {
+            this.messageRenderer.initializeMermaidTheme();
+            // 既存の図表を再レンダリング（オプション）
+            this.reRenderMermaidDiagrams();
+        }
+    }
+    
+    reRenderMermaidDiagrams() {
+        const diagrams = document.querySelectorAll('.mermaid.mermaid-processed');
+        diagrams.forEach(diagram => {
+            diagram.classList.remove('mermaid-processed');
+        });
+        
+        // 少し遅延してから再レンダリング
+        setTimeout(() => {
+            if (this.messageRenderer) {
+                this.messageRenderer.processMermaidDiagrams();
+            }
+        }, 100);
+    }
+    
+    async copyMessage(messageId) {
+        try {
+            console.log('Copying message:', messageId);
+            
+            // Step 1: メッセージIDから実際のメッセージデータを取得
+            let messageContent = await this.getFullMessageContent(messageId);
+            
+            if (messageContent) {
+                console.log('Retrieved full message content from data, length:', messageContent.length);
+                
+                // テキストのクリーンアップ
+                messageContent = messageContent
+                    .replace(/\n\s*\n\s*\n/g, '\n\n') // 3つ以上の改行を2つに
+                    .replace(/^\s+|\s+$/g, '') // 前後の空白を削除
+                    .trim();
+                
+                // クリップボードにコピー
+                await this.copyTextToClipboard(messageContent);
+                this.showCopyFeedback(messageId);
+                return;
+            }
+            
+            console.log('Fallback: searching for message element in DOM');
+            
+            // Step 2: フォールバック - DOM要素から取得
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (!messageElement) {
+                console.error('Message element not found for ID:', messageId);
+                throw new Error('Message not found');
+            }
+            
+            console.log('Found message element:', messageElement);
+            console.log('Element structure:', messageElement.innerHTML);
+            
+            // ツリーノードの場合は、メインメッセージエリアから該当メッセージを探す
+            if (messageElement.classList.contains('tree-node')) {
+                console.log('This is a tree node, searching for actual message in main area...');
+                const mainMessageElement = document.querySelector(`#messagesContainer [data-message-id="${messageId}"]`);
+                if (mainMessageElement) {
+                    console.log('Found corresponding message in main area');
+                    return this.copyFromDOMElement(mainMessageElement, messageId);
+                } else {
+                    console.log('No corresponding message found in main area, using stored data');
+                    throw new Error('Unable to find full message content');
+                }
+            }
+            
+            // 通常のメッセージ要素の場合
+            return this.copyFromDOMElement(messageElement, messageId);
+            
+        } catch (error) {
+            console.error('Copy failed:', error);
+            console.error('Error stack:', error.stack);
+            alert(`コピーに失敗しました: ${error.message}`);
+        }
+    }
+    
+    async getFullMessageContent(messageId) {
+        try {
+            // キャッシュされたメッセージからコンテンツを取得
+            const allMessages = this.getAllStoredMessages();
+            const message = this.findMessageInTree(allMessages, messageId);
+            
+            if (message && message.content) {
+                console.log('Found message in stored data:', message.content.substring(0, 100) + '...');
+                return message.content;
+            }
+            
+            console.log('Message not found in stored data, will use DOM fallback');
+            return null;
+        } catch (error) {
+            console.error('Error getting full message content:', error);
+            return null;
+        }
+    }
+    
+    getAllStoredMessages() {
+        // 現在表示されているメッセージツリーから全メッセージを取得
+        if (this.currentThreadMessages) {
+            return this.currentThreadMessages;
+        }
+        
+        // フォールバック: APIから取得（キャッシュがない場合）
+        return [];
+    }
+    
+    findMessageInTree(messages, targetId) {
+        for (const message of messages) {
+            if (message.id == targetId) {
+                return message;
+            }
+            if (message.children && message.children.length > 0) {
+                const found = this.findMessageInTree(message.children, targetId);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+    
+    async copyTextToClipboard(text) {
+        console.log('Copying text to clipboard, length:', text.length);
+        console.log('First 200 chars:', text.substring(0, 200));
+        console.log('Last 200 chars:', text.substring(text.length - 200));
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            console.log('Using modern clipboard API');
+            await navigator.clipboard.writeText(text);
+        } else {
+            console.log('Using fallback clipboard method');
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (!successful) {
+                throw new Error('Fallback copy command failed');
+            }
+        }
+        
+        console.log('Copy successful');
+    }
+    
+    async copyFromDOMElement(messageElement, messageId) {
+        // より柔軟にメッセージテキスト要素を検索
+        let messageTextElement = messageElement.querySelector('.message-text');
+        
+        // .message-textが見つからない場合、代替要素を探す
+        if (!messageTextElement) {
+            console.log('Primary .message-text not found, searching alternatives...');
+            
+            // 代替候補を検索
+            messageTextElement = messageElement.querySelector('.message-content') || 
+                                messageElement.querySelector('.message') || 
+                                messageElement;
+            
+            console.log('Using alternative element:', messageTextElement);
+        }
+        
+        if (!messageTextElement) {
+            console.error('No suitable message text element found');
+            throw new Error('Message text element not found');
+        }
+        
+        console.log('Found message text element:', messageTextElement);
+        
+        let textContent = '';
+        
+        // 複数の方法でテキスト取得を試行
+        try {
+            // 最も確実な方法：要素をクローンしてボタン類を削除してからテキスト抽出
+            const tempDiv = messageTextElement.cloneNode(true);
+            
+            // すべてのボタン要素とアクション要素を削除
+            const elementsToRemove = tempDiv.querySelectorAll('.copy-btn, .message-action-btn, .message-actions, button');
+            elementsToRemove.forEach(el => el.remove());
+            
+            // 方法1: innerTextを使用（最も正確）
+            textContent = tempDiv.innerText || '';
+            
+            // 方法2: innerTextが空の場合、textContentを試行
+            if (!textContent.trim()) {
+                console.log('innerText empty, trying textContent...');
+                textContent = tempDiv.textContent || '';
+            }
+            
+            // 方法3: それでも空の場合、子要素から再帰的に取得
+            if (!textContent.trim()) {
+                console.log('textContent empty, trying recursive extraction...');
+                
+                const extractText = (element) => {
+                    let text = '';
+                    for (const node of element.childNodes) {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            text += node.textContent;
+                        } else if (node.nodeType === Node.ELEMENT_NODE) {
+                            if (node.tagName === 'BR') {
+                                text += '\n';
+                            } else if (node.tagName === 'P') {
+                                text += extractText(node) + '\n\n';
+                            } else if (node.tagName === 'PRE' || node.tagName === 'CODE') {
+                                text += node.textContent || node.innerText || '';
+                            } else if (node.tagName === 'H1' || node.tagName === 'H2' || node.tagName === 'H3' || 
+                                      node.tagName === 'H4' || node.tagName === 'H5' || node.tagName === 'H6') {
+                                text += extractText(node) + '\n\n';
+                            } else if (node.tagName === 'LI') {
+                                text += '• ' + extractText(node) + '\n';
+                            } else if (node.tagName === 'TD' || node.tagName === 'TH') {
+                                text += extractText(node) + '\t';
+                            } else if (node.tagName === 'TR') {
+                                text += extractText(node) + '\n';
+                            } else {
+                                text += extractText(node);
+                            }
+                        }
+                    }
+                    return text;
+                };
+                
+                textContent = extractText(tempDiv);
+            }
+            
+            console.log('DOM extracted text content length:', textContent.length);
+            console.log('First 200 chars:', textContent.substring(0, 200));
+            console.log('Last 200 chars:', textContent.substring(textContent.length - 200));
+            
+        } catch (extractError) {
+            console.error('Text extraction error:', extractError);
+            // 緊急時のフォールバック
+            textContent = messageTextElement.innerText || messageTextElement.textContent || 'テキスト抽出エラー';
+        }
+        
+        if (!textContent || !textContent.trim()) {
+            console.error('No content found to copy');
+            throw new Error('No content to copy');
+        }
+        
+        // テキストのクリーンアップ
+        textContent = textContent
+            .replace(/\n\s*\n\s*\n/g, '\n\n') // 3つ以上の改行を2つに
+            .replace(/^\s+|\s+$/g, '') // 前後の空白を削除
+            .trim();
+        
+        console.log('Cleaned DOM text content:', textContent);
+        
+        // クリップボードにコピー
+        await this.copyTextToClipboard(textContent);
+        this.showCopyFeedback(messageId);
+    }
+    
+    showCopyFeedback(messageId) {
+        const button = document.querySelector(`[data-message-id="${messageId}"] .copy-btn`);
+        if (button) {
+            const originalText = button.textContent;
+            const originalTitle = button.title;
+            
+            // 一時的に成功表示
+            button.textContent = '✅';
+            button.title = 'コピーしました！';
+            button.classList.add('copy-success');
+            
+            // 2秒後に元に戻す
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.title = originalTitle;
+                button.classList.remove('copy-success');
+            }, 2000);
+        }
+    }
+    
+    addMobileActionInteraction(messageElement) {
+        // モバイルデバイスでのタップでアクションボタン表示制御
+        let tapTimeout = null;
+        let isActive = false;
+        
+        const toggleActions = () => {
+            // 他のアクティブなメッセージを非アクティブに
+            document.querySelectorAll('.message.active').forEach(el => {
+                if (el !== messageElement) {
+                    el.classList.remove('active');
+                }
+            });
+            
+            // このメッセージのアクティブ状態を切り替え
+            isActive = !isActive;
+            if (isActive) {
+                messageElement.classList.add('active');
+                
+                // 5秒後に自動的に非アクティブに
+                if (tapTimeout) {
+                    clearTimeout(tapTimeout);
+                }
+                tapTimeout = setTimeout(() => {
+                    messageElement.classList.remove('active');
+                    isActive = false;
+                }, 5000);
+            } else {
+                messageElement.classList.remove('active');
+                if (tapTimeout) {
+                    clearTimeout(tapTimeout);
+                    tapTimeout = null;
+                }
+            }
+        };
+        
+        // タッチデバイスでのタップイベント
+        messageElement.addEventListener('touchstart', (e) => {
+            // アクションボタンのクリックは除外
+            if (e.target.closest('.message-action-btn, .message-actions')) {
+                return;
+            }
+            
+            // メッセージ本体をタップした場合のみアクション表示
+            if (e.target.closest('.message-content') || e.target.closest('.message-text')) {
+                e.preventDefault();
+                toggleActions();
+            }
+        }, { passive: false });
+        
+        // 非タッチデバイス（PC）でのクリック
+        messageElement.addEventListener('click', (e) => {
+            // タッチデバイスではないか確認
+            if ('ontouchstart' in window) {
+                return; // タッチデバイスではクリックイベントを無視
+            }
+            
+            // アクションボタンのクリックは除外
+            if (e.target.closest('.message-action-btn, .message-actions')) {
+                return;
+            }
+            
+            // メッセージ本体をクリックした場合のみアクション表示
+            if (e.target.closest('.message-content') || e.target.closest('.message-text')) {
+                toggleActions();
+            }
+        });
+        
+        // 外部クリックで非アクティブ化
+        document.addEventListener('click', (e) => {
+            if (!messageElement.contains(e.target)) {
+                messageElement.classList.remove('active');
+                isActive = false;
+                if (tapTimeout) {
+                    clearTimeout(tapTimeout);
+                    tapTimeout = null;
+                }
+            }
+        });
     }
     
     showModal(modalId) {

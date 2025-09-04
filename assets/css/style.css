@@ -1960,8 +1960,183 @@ html,
     padding: 1rem;
 }
 
+/* Mermaid図表スタイル */
+.message-content .markdown-content .mermaid-container {
+    margin: 1.5rem 0;
+    text-align: center;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+/* Mermaid SVG要素の色調整 */
+.message-content .markdown-content .mermaid svg {
+    background: transparent;
+}
+
+/* ダークモード用のMermaid色調整 */
+.dark-theme .mermaid svg .node rect,
+.dark-theme .mermaid svg .node circle,
+.dark-theme .mermaid svg .node ellipse,
+.dark-theme .mermaid svg .node polygon {
+    fill: var(--bg-tertiary) !important;
+    stroke: var(--border-color) !important;
+}
+
+.dark-theme .mermaid svg .node .label,
+.dark-theme .mermaid svg text {
+    fill: var(--text-primary) !important;
+}
+
+.dark-theme .mermaid svg .edgePath path {
+    stroke: var(--text-secondary) !important;
+}
+
+.dark-theme .mermaid svg .arrowheadPath {
+    fill: var(--text-secondary) !important;
+}
+
+/* ライトモード用のMermaid色調整 */
+.light-theme .mermaid svg .node rect,
+.light-theme .mermaid svg .node circle,
+.light-theme .mermaid svg .node ellipse,
+.light-theme .mermaid svg .node polygon {
+    fill: var(--bg-primary) !important;
+    stroke: var(--border-color) !important;
+}
+
+.light-theme .mermaid svg .node .label,
+.light-theme .mermaid svg text {
+    fill: var(--text-primary) !important;
+}
+
+.light-theme .mermaid svg .edgePath path {
+    stroke: var(--text-secondary) !important;
+}
+
+.light-theme .mermaid svg .arrowheadPath {
+    fill: var(--text-secondary) !important;
+}
+
+.message-content .markdown-content .mermaid {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.message-content .markdown-content .mermaid svg {
+    max-width: 100%;
+    height: auto;
+}
+
+.message-content .markdown-content .mermaid-error {
+    background-color: var(--error-color);
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+/* Message actions styles */
+.message-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+/* AI message actions (右下配置) */
+.message.assistant .message-actions.ai-actions {
+    position: absolute;
+    top: auto !important;
+    bottom: 8px;
+    right: 8px;
+    margin: 0;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Show actions when message is active (for mobile tap interaction) */
+.message.active .message-actions,
+.message.assistant.active .message-actions.ai-actions {
+    opacity: 1;
+}
+
+.message.assistant {
+    position: relative;
+}
+
+.message.assistant .message-content {
+    position: relative;
+    padding-right: 40px; /* コピーボタン用のスペースを確保 */
+    padding-bottom: 10px; /* 下部マージンも追加 */
+}
+
+.message-action-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.message-action-btn:hover {
+    background-color: var(--bg-tertiary);
+    transform: scale(1.1);
+}
+
+/* Copy button specific styles */
+.copy-btn {
+    font-size: 14px;
+}
+
+.copy-btn.copy-success {
+    background-color: var(--success-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.copy-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
 /* モバイル最適化 */
 @media (max-width: 768px) {
+    /* AI message actions mobile optimization */
+    .message.assistant .message-content {
+        padding-right: 35px; /* モバイルではより狭く */
+    }
+    
+    .message.assistant .message-actions.ai-actions {
+        bottom: 4px;
+        right: 4px;
+        padding: 1px;
+    }
+    
+    .copy-btn {
+        font-size: 12px;
+        width: 24px;
+        height: 24px;
+    }
+    
     .message-content .markdown-content h1 { font-size: 1.5rem; }
     .message-content .markdown-content h2 { font-size: 1.3rem; }
     .message-content .markdown-content h3 { font-size: 1.1rem; }
@@ -2017,6 +2192,16 @@ html,
     
     .message-content .markdown-content .math-inline {
         font-size: 0.9rem;
+    }
+    
+    /* モバイルMermaid最適化 */
+    .message-content .markdown-content .mermaid-container {
+        padding: 0.75rem;
+        margin: 1rem 0;
+    }
+    
+    .message-content .markdown-content .mermaid svg {
+        font-size: 12px;
     }
 }
 
