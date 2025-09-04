@@ -374,6 +374,11 @@ $csrfToken = $auth->generateCSRFToken();
         window.csrfToken = window.appConfig.csrfToken;
         window.authCredentials = window.appConfig.authCredentials;
     </script>
+    <!-- Markdown処理ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+    
     <script src="assets/js/app.js"></script>
     <script src="assets/js/tree.js"></script>
     <script src="assets/js/files.js"></script>

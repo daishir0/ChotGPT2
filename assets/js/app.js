@@ -1,5 +1,77 @@
 // ChotGPT Main Application JavaScript
 
+// Markdown rendering utility class
+class MessageRenderer {
+    constructor() {
+        this.initializeLibraries();
+    }
+    
+    initializeLibraries() {
+        if (typeof marked !== 'undefined') {
+            // Marked.js設定
+            marked.setOptions({
+                highlight: (code, lang) => {
+                    if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (err) {
+                            console.warn('Highlight.js error:', err);
+                        }
+                    }
+                    return hljs ? hljs.highlightAuto(code).value : this.escapeHtml(code);
+                },
+                breaks: true,
+                gfm: true,
+                tables: true,
+                sanitize: false,
+                smartypants: true
+            });
+        }
+    }
+    
+    renderMessage(content) {
+        if (!content) return '';
+        
+        try {
+            // Markdown判定
+            if (this.isMarkdownContent(content)) {
+                const html = marked ? marked.parse(content) : this.escapeHtml(content);
+                return `<div class="markdown-content">${html}</div>`;
+            } else {
+                // 通常のテキストとして処理
+                return this.escapeHtml(content).replace(/\n/g, '<br>');
+            }
+        } catch (error) {
+            console.warn('Markdown rendering error:', error);
+            return this.escapeHtml(content).replace(/\n/g, '<br>');
+        }
+    }
+    
+    isMarkdownContent(content) {
+        const markdownPatterns = [
+            /^#{1,6}\s/m,           // 見出し
+            /```[\s\S]*?```/,       // コードブロック
+            /\|.+\|/,              // テーブル
+            /^\s*[-*+]\s/m,        // リスト
+            /^\s*\d+\.\s/m,        // 番号付きリスト
+            /^\s*>\s/m,            // 引用
+            /\*\*[^*]+\*\*/,       // 太字
+            /\*[^*]+\*/,           // 斜体
+            /`[^`]+`/,             // インラインコード
+            /\[.+\]\(.+\)/,        // リンク
+            /^---+$/m              // 水平線
+        ];
+        
+        return markdownPatterns.some(pattern => pattern.test(content));
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
 class ChotGPTApp {
     constructor() {
         this.currentThread = null;
@@ -15,6 +87,9 @@ class ChotGPTApp {
         
         // URL設定を取得
         this.apiBaseUrl = window.appConfig?.urls?.apiUrl || '/api';
+        
+        // Message renderer初期化
+        this.messageRenderer = new MessageRenderer();
         
         this.init();
     }
@@ -571,12 +646,7 @@ class ChotGPTApp {
     }
     
     formatMessageContent(content) {
-        // Simple markdown-like formatting
-        return content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`(.*?)`/g, '<code>$1</code>')
-            .replace(/\n/g, '<br>');
+        return this.messageRenderer.renderMessage(content);
     }
     
     async sendMessage() {
