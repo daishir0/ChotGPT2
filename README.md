@@ -1,7 +1,7 @@
 # ChotGPT2
 
 ## Overview
-ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, and **responsive design** for seamless cross-platform usage.
+ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and AI model switching capabilities. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, **comprehensive Markdown rendering with LaTeX math support**, **complete Mermaid diagram visualization**, and **responsive design** for seamless cross-platform usage.
 
 ### 🚀 BREAKTHROUGH INNOVATION: Thread-Specific AI Personas
 **ChotGPT2 introduces the world's first thread-specific AI persona system** - a revolutionary feature that no other AI chat application offers:
@@ -91,6 +91,25 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
    - **CSV files are converted to Markdown tables** for better AI context
 4. Send messages with file context
 
+### Rich Content Rendering
+1. **Markdown Support**: Full GitHub Flavored Markdown with syntax highlighting
+   - Headers, lists, tables, code blocks, links, images
+   - Syntax highlighting for 100+ programming languages
+   - Responsive table design with horizontal scrolling
+2. **Mathematical Equations**: Complete LaTeX rendering with KaTeX
+   - Inline math: `$E = mc^2$`
+   - Block equations: `$$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$`
+   - Advanced mathematical notation and symbols
+3. **Diagram Visualization**: Full Mermaid.js support for all diagram types
+   - **Flowcharts**: Process flows and decision trees
+   - **Sequence Diagrams**: System interactions and API flows
+   - **Gantt Charts**: Project timelines and scheduling
+   - **Pie Charts**: Data distribution and statistics
+   - **State Diagrams**: System states and transitions
+   - **Class Diagrams**: Object-oriented design visualization
+   - **ER Diagrams**: Database relationships and schemas
+   - **Git Graphs**: Version control branch visualization
+
 ### Conversation Tree Navigation
 1. Click the 🌳 "Tree View" button to visualize conversation branches
 2. Click on any node to navigate to that specific conversation point
@@ -101,6 +120,8 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 - **Edit**: Hover over any message and click ✏️ to edit and create a branch
 - **Branch**: Click 🌿 to create a new branch from that point
 - **Delete**: Click 🗑️ to remove a message and its branches
+- **Copy**: Click 📋 on AI messages to copy the full text content (preserves formatting)
+- **Mobile Touch**: Single tap on messages to show action buttons on mobile devices
 
 ### Settings Configuration
 - Click ⚙️ "Settings" to access configuration
@@ -137,6 +158,9 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 - **Thread deletion errors**: Ensure sessions are properly initialized
 - **Mobile scrolling issues**: Check CSS touch-action and overflow settings
 - **Search not working**: Verify JavaScript is enabled and no console errors
+- **Markdown not rendering**: Ensure Marked.js and Highlight.js libraries are loaded
+- **Math equations not showing**: Verify KaTeX library is properly included
+- **Mermaid diagrams not rendering**: Check Mermaid.js library loading and browser console for errors
 
 ### Technical Requirements
 - Minimum PHP 7.4 (PHP 8+ recommended)
@@ -152,7 +176,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 # ChotGPT2
 
 ## 概要
-ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
+ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、AIモデル切り替え機能を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**LaTeX数式対応の包括的Markdownレンダリング**、**完全なMermaid図表可視化**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
 
 ### 🚀 画期的イノベーション：スレッド固有AIペルソナ
 **ChotGPT2は世界初のスレッド固有AIペルソナシステムを導入** - 他のAIチャットアプリケーションにはない革新的機能：
@@ -237,6 +261,25 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
    - **CSVファイルはMarkdownテーブルに変換**され、AIがより理解しやすい形式になります
 4. ファイルコンテキスト付きでメッセージを送信
 
+### リッチコンテンツレンダリング
+1. **Markdownサポート**: シンタックスハイライト付きの完全なGitHub Flavored Markdown
+   - 見出し、リスト、テーブル、コードブロック、リンク、画像
+   - 100以上のプログラミング言語のシンタックスハイライト
+   - 水平スクロール対応のレスポンシブテーブルデザイン
+2. **数学方程式**: KaTeXによる完全なLaTeXレンダリング
+   - インライン数式: `$E = mc^2$`
+   - ブロック方程式: `$$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$`
+   - 高度な数学記号と表記法
+3. **図表可視化**: 全図表タイプ対応の完全なMermaid.jsサポート
+   - **フローチャート**: プロセスフローと決定木
+   - **シーケンス図**: システムインタラクションとAPIフロー
+   - **ガントチャート**: プロジェクトタイムラインとスケジューリング
+   - **円グラフ**: データ分布と統計
+   - **状態遷移図**: システム状態と遷移
+   - **クラス図**: オブジェクト指向設計の可視化
+   - **ER図**: データベースリレーションシップとスキーマ
+   - **Gitグラフ**: バージョン管理ブランチの可視化
+
 ### 会話ツリーナビゲーション
 1. 🌳「ツリー表示」ボタンをクリックして会話の分岐を視覚化
 2. 任意のノードをクリックしてその特定の会話ポイントに移動
@@ -247,6 +290,8 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 - **編集**: メッセージにマウスオーバーして✏️をクリックして編集・分岐作成
 - **分岐**: 🌿をクリックしてそのポイントから新しい分岐を作成
 - **削除**: 🗑️をクリックしてメッセージとその分岐を削除
+- **コピー**: AIメッセージの📋をクリックしてフルテキストコンテンツをコピー（フォーマット保持）
+- **モバイルタッチ**: モバイルデバイスでメッセージをシングルタップしてアクションボタンを表示
 
 ### 設定の構成
 - ⚙️「設定」をクリックして設定にアクセス
@@ -283,6 +328,9 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 - **スレッド削除エラー**: セッションが適切に初期化されていることを確認してください
 - **モバイルスクロールの問題**: CSSのtouch-actionとoverflowの設定を確認してください
 - **検索が動作しない**: JavaScriptが有効になっており、コンソールエラーがないことを確認してください
+- **Markdownがレンダリングされない**: Marked.jsとHighlight.jsライブラリが読み込まれていることを確認してください
+- **数式が表示されない**: KaTeXライブラリが適切にインクルードされていることを確認してください
+- **Mermaid図表がレンダリングされない**: Mermaid.jsライブラリの読み込みとブラウザコンソールのエラーを確認してください
 
 ### 技術要件
 - 最低PHP 7.4（PHP 8+推奨）
