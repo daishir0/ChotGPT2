@@ -383,6 +383,9 @@ $csrfToken = $auth->generateCSRFToken();
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     
+    <!-- 図表・ダイアグラムライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    
     <script src="assets/js/app.js"></script>
     <script src="assets/js/tree.js"></script>
     <script src="assets/js/files.js"></script>
