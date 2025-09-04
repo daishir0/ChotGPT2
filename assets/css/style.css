@@ -1928,6 +1928,38 @@ html,
     opacity: 0.9;
 }
 
+/* 数式スタイル (KaTeX) */
+.message-content .markdown-content .math-block {
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.message-content .markdown-content .math-inline {
+    display: inline;
+    margin: 0 0.2rem;
+}
+
+.message-content .markdown-content .math-error {
+    background-color: var(--error-color);
+    color: white;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.message-content .markdown-content .math-block .math-error {
+    display: block;
+    text-align: center;
+    margin: 1rem 0;
+    padding: 1rem;
+}
+
 /* モバイル最適化 */
 @media (max-width: 768px) {
     .message-content .markdown-content h1 { font-size: 1.5rem; }
@@ -1974,6 +2006,17 @@ html,
     .message-content .markdown-content td {
         padding: 0.4rem 0.6rem;
         white-space: nowrap;
+    }
+    
+    /* モバイル数式最適化 */
+    .message-content .markdown-content .math-block {
+        padding: 0.75rem;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .message-content .markdown-content .math-inline {
+        font-size: 0.9rem;
     }
 }
 

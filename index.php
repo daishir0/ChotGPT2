@@ -379,6 +379,10 @@ $csrfToken = $auth->generateCSRFToken();
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
     
+    <!-- 数式レンダリングライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    
     <script src="assets/js/app.js"></script>
     <script src="assets/js/tree.js"></script>
     <script src="assets/js/files.js"></script>

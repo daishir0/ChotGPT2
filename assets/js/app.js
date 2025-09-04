@@ -27,15 +27,26 @@ class MessageRenderer {
                 smartypants: true
             });
         }
+        
+        // KaTeX初期化確認
+        if (typeof katex !== 'undefined') {
+            console.log('KaTeX initialized successfully');
+        }
     }
     
     renderMessage(content) {
         if (!content) return '';
         
         try {
-            // Markdown判定
-            if (this.isMarkdownContent(content)) {
-                let html = marked ? marked.parse(content) : this.escapeHtml(content);
+            // 数式を含むかどうかもチェック
+            if (this.isMarkdownContent(content) || this.hasMathContent(content)) {
+                let html;
+                
+                // 数式の前処理
+                content = this.preprocessMath(content);
+                
+                // Markdownレンダリング
+                html = marked ? marked.parse(content) : this.escapeHtml(content);
                 
                 // テーブルをレスポンシブ対応に変換
                 html = this.makeTablesResponsive(html);
@@ -56,6 +67,111 @@ class MessageRenderer {
         return html.replace(/<table([^>]*)>/g, '<div class="table-wrapper"><table$1>').replace(/<\/table>/g, '</table></div>');
     }
     
+    hasMathContent(content) {
+        const mathPatterns = [
+            /\$\$[\s\S]*?\$\$/,     // ブロック数式 $$...$$
+            /\$[^$\n]*\$/,          // インライン数式 $...$
+            /\\\[[\s\S]*?\\\]/,     // LaTeX ブロック数式 \[...\]
+            /\\\([\s\S]*?\\\)/,     // LaTeX インライン数式 \(...\)
+            /\[[\s\S]*?\]/          // 簡略ブロック数式 [...]（AIがよく使う）
+        ];
+        
+        return mathPatterns.some(pattern => pattern.test(content));
+    }
+    
+    preprocessMath(content) {
+        if (typeof katex === 'undefined') {
+            console.warn('KaTeX not available');
+            return content;
+        }
+        
+        try {
+            // ブロック数式の処理 $$...$$
+            content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+                try {
+                    const rendered = katex.renderToString(math.trim(), {
+                        displayMode: true,
+                        throwOnError: false,
+                        strict: false
+                    });
+                    return `<div class="math-block">${rendered}</div>`;
+                } catch (error) {
+                    console.warn('KaTeX block math error:', error);
+                    return `<div class="math-error">$$${math}$$</div>`;
+                }
+            });
+            
+            // LaTeX ブロック数式の処理 \[...\]
+            content = content.replace(/\\\[([\s\S]*?)\\\]/g, (match, math) => {
+                try {
+                    const rendered = katex.renderToString(math.trim(), {
+                        displayMode: true,
+                        throwOnError: false,
+                        strict: false
+                    });
+                    return `<div class="math-block">${rendered}</div>`;
+                } catch (error) {
+                    console.warn('KaTeX LaTeX block math error:', error);
+                    return `<div class="math-error">\\[${math}\\]</div>`;
+                }
+            });
+            
+            // 簡略ブロック数式の処理 [...]（AIがよく使う）
+            content = content.replace(/^\s*\[\s*([\s\S]*?)\s*\]\s*$/gm, (match, math) => {
+                // 数式っぽいかチェック（英数字、記号、LaTeX命令を含む）
+                if (/[a-zA-Z0-9+\-=^_{}\\()√∫∑∏αβγδεζηθικλμνξοπρστυφχψω]/.test(math)) {
+                    try {
+                        const rendered = katex.renderToString(math.trim(), {
+                            displayMode: true,
+                            throwOnError: false,
+                            strict: false
+                        });
+                        return `<div class="math-block">${rendered}</div>`;
+                    } catch (error) {
+                        console.warn('KaTeX bracket math error:', error);
+                        return `<div class="math-error">[${math}]</div>`;
+                    }
+                }
+                return match; // 数式でない場合はそのまま
+            });
+            
+            // インライン数式の処理 $...$
+            content = content.replace(/\$([^$\n]+?)\$/g, (match, math) => {
+                try {
+                    const rendered = katex.renderToString(math.trim(), {
+                        displayMode: false,
+                        throwOnError: false,
+                        strict: false
+                    });
+                    return `<span class="math-inline">${rendered}</span>`;
+                } catch (error) {
+                    console.warn('KaTeX inline math error:', error);
+                    return `<span class="math-error">$${math}$</span>`;
+                }
+            });
+            
+            // LaTeX インライン数式の処理 \(...\)
+            content = content.replace(/\\\(([\s\S]*?)\\\)/g, (match, math) => {
+                try {
+                    const rendered = katex.renderToString(math.trim(), {
+                        displayMode: false,
+                        throwOnError: false,
+                        strict: false
+                    });
+                    return `<span class="math-inline">${rendered}</span>`;
+                } catch (error) {
+                    console.warn('KaTeX LaTeX inline math error:', error);
+                    return `<span class="math-error">\\(${math}\\)</span>`;
+                }
+            });
+            
+            return content;
+        } catch (error) {
+            console.warn('Math preprocessing error:', error);
+            return content;
+        }
+    }
+    
     isMarkdownContent(content) {
         const markdownPatterns = [
             /^#{1,6}\s/m,           // 見出し
@@ -68,7 +184,12 @@ class MessageRenderer {
             /\*[^*]+\*/,           // 斜体
             /`[^`]+`/,             // インラインコード
             /\[.+\]\(.+\)/,        // リンク
-            /^---+$/m              // 水平線
+            /^---+$/m,             // 水平線
+            /\$\$[\s\S]*?\$\$/,    // ブロック数式
+            /\$[^$\n]+\$/,         // インライン数式
+            /\\\[[\s\S]*?\\\]/,    // LaTeX ブロック数式
+            /\\\([\s\S]*?\\\)/,    // LaTeX インライン数式
+            /\[[\s\S]*?\]/         // 簡略ブロック数式
         ];
         
         return markdownPatterns.some(pattern => pattern.test(content));
