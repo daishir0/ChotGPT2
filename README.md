@@ -14,6 +14,8 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 
 ![chotgpt2](assets/chotgpt2.png)
 
+![thread prompt](assets/thread_prompt.png)
+
 ## Installation
 
 ### Prerequisites
@@ -110,11 +112,18 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
    - **ER Diagrams**: Database relationships and schemas
    - **Git Graphs**: Version control branch visualization
 
+![markdown](assets/markdown.png)
+
+![latex](assets/latex.png)
+
+
 ### Conversation Tree Navigation
 1. Click the 🌳 "Tree View" button to visualize conversation branches
 2. Click on any node to navigate to that specific conversation point
 3. Edit messages to create new conversation branches
 4. Use tree navigation to explore different conversation paths
+
+![Tree Navigation](assets/tree.png)
 
 ### Message Actions
 - **Edit**: Hover over any message and click ✏️ to edit and create a branch
