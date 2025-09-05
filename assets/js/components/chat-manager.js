@@ -48,10 +48,8 @@ class ChatManager {
                     console.warn('⚠️ fileAttachmentManager not available for cleanup');
                 }
                 
-                if (!this.app._currentThread) {
-                    this.app._currentThread = data.thread_id;
-                    this.app.threadManager.loadThreads();
-                }
+                // スレッドIDの更新（新規チャット時のスレッド作成は削除済み）
+                // currentThreadは事前に設定済みのはず
                 
                 this.app._currentMessageId = data.assistant_message_id;
                 this.loadMessages();
@@ -293,32 +291,71 @@ class ChatManager {
     /**
      * 新しいチャット開始
      */
-    newChat() {
-        this.app._currentThread = null;
-        this.app._currentMessageId = null;
-        
-        // Clear file attachments safely
-        if (this.app.fileAttachmentManager) {
-            this.app.fileAttachmentManager.selectedFiles = [];
-            this.app.fileAttachmentManager.updateFileAttachments();
+    async newChat() {
+        try {
+            // 新規スレッドをデータベースに作成
+            const data = await this.app.apiClient.createEmptyThread();
+            
+            if (data.success) {
+                // 作成されたスレッドを選択状態にする
+                this.app._currentThread = data.thread_id;
+                this.app._currentMessageId = null;
+                
+                // Clear file attachments safely
+                if (this.app.fileAttachmentManager) {
+                    this.app.fileAttachmentManager.selectedFiles = [];
+                    this.app.fileAttachmentManager.updateFileAttachments();
+                }
+                
+                // UI更新
+                document.getElementById('currentThreadName').textContent = data.thread_name;
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="welcome-message">
+                        <h3>新しいチャットを開始</h3>
+                        <p>メッセージを入力してチャットを始めてください。</p>
+                    </div>
+                `;
+                
+                // スレッド一覧の選択状態を更新
+                document.querySelectorAll('.thread-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.threadId == data.thread_id);
+                });
+                
+                // ボタン有効化
+                this.app.updateThreadDependentButtons();
+                
+                // スレッド一覧を更新
+                this.app.threadManager.loadThreads();
+                
+                this.app.uiManager.hideTreeView();
+            }
+        } catch (error) {
+            console.error('新規スレッド作成エラー:', error);
+            // フォールバック：従来の動作
+            this.app._currentThread = null;
+            this.app._currentMessageId = null;
+            
+            if (this.app.fileAttachmentManager) {
+                this.app.fileAttachmentManager.selectedFiles = [];
+                this.app.fileAttachmentManager.updateFileAttachments();
+            }
+            
+            this.app.updateThreadDependentButtons();
+            
+            document.getElementById('currentThreadName').textContent = '新しいチャット';
+            document.getElementById('messagesContainer').innerHTML = `
+                <div class="welcome-message">
+                    <h3>新しいチャットを開始</h3>
+                    <p>メッセージを入力してチャットを始めてください。</p>
+                </div>
+            `;
+            
+            document.querySelectorAll('.thread-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            this.app.uiManager.hideTreeView();
         }
-        
-        // Update thread-dependent buttons
-        this.app.updateThreadDependentButtons();
-        
-        document.getElementById('currentThreadName').textContent = '新しいチャット';
-        document.getElementById('messagesContainer').innerHTML = `
-            <div class="welcome-message">
-                <h3>新しいチャットを開始</h3>
-                <p>メッセージを入力してチャットを始めてください。</p>
-            </div>
-        `;
-        
-        document.querySelectorAll('.thread-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        this.app.uiManager.hideTreeView();
     }
 }
 

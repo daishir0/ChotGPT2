@@ -73,6 +73,10 @@ try {
             handleCreate($chatManager, $auth, $_POST);
             break;
             
+        case 'create_empty':
+            handleCreateEmpty($chatManager, $auth, $_POST);
+            break;
+            
         case 'get':
             handleGet($chatManager, $_GET);
             break;
@@ -150,6 +154,26 @@ function handleCreate($chatManager, $auth, $data) {
     
     echo json_encode([
         'success' => true,
+        'thread' => $thread
+    ]);
+}
+
+function handleCreateEmpty($chatManager, $auth, $data) {
+    if (!$auth->validateCSRFToken($data['csrf_token'] ?? '')) {
+        throw new Exception('Invalid CSRF token');
+    }
+    
+    // タイムスタンプ付きのスレッド名を生成
+    $timestamp = date('Y-m-d H:i');
+    $name = '新規チャット ' . $timestamp;
+    
+    $threadId = $chatManager->createThread($name);
+    $thread = $chatManager->getThread($threadId);
+    
+    echo json_encode([
+        'success' => true,
+        'thread_id' => $threadId,
+        'thread_name' => $name,
         'thread' => $thread
     ]);
 }

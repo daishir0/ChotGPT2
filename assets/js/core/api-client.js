@@ -131,6 +131,22 @@ class APIClient {
     }
     
     /**
+     * 空の新規スレッド作成
+     */
+    async createEmptyThread() {
+        const formData = new FormData();
+        formData.append('action', 'create_empty');
+        formData.append('csrf_token', window.csrfToken);
+        
+        const response = await this.authenticatedFetch(`${this.apiBaseUrl}/threads.php`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        return await response.json();
+    }
+    
+    /**
      * スレッド更新
      */
     async updateThread(threadId, name) {
