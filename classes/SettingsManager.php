@@ -59,7 +59,7 @@ class SettingsManager {
             
             $result = $this->db->query("
                 INSERT OR REPLACE INTO settings (key, value, updated_at) 
-                VALUES (?, ?, CURRENT_TIMESTAMP)
+                VALUES (?, ?, datetime('now','localtime'))
             ", [$key, $this->formatValue($value)]);
             
             if ($this->logger) {
@@ -87,7 +87,7 @@ class SettingsManager {
                 
                 $this->db->query("
                     INSERT OR REPLACE INTO settings (key, value, updated_at) 
-                    VALUES (?, ?, CURRENT_TIMESTAMP)
+                    VALUES (?, ?, datetime('now','localtime'))
                 ", [$key, $this->formatValue($value)]);
             }
             

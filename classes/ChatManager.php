@@ -10,7 +10,7 @@ class ChatManager {
     }
     
     public function createThread($name) {
-        $sql = "INSERT INTO threads (name) VALUES (?)";
+        $sql = "INSERT INTO threads (name, created_at, updated_at) VALUES (?, datetime('now','localtime'), datetime('now','localtime'))";
         $this->db->query($sql, [$name]);
         $threadId = $this->db->lastInsertId();
         
@@ -30,21 +30,21 @@ class ChatManager {
     }
     
     public function updateThreadName($threadId, $name) {
-        $sql = "UPDATE threads SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        $sql = "UPDATE threads SET name = ?, updated_at = datetime('now','localtime') WHERE id = ?";
         $this->db->query($sql, [$name, $threadId]);
         
         $this->logger->info('Thread name updated', ['thread_id' => $threadId, 'name' => $name]);
     }
     
     public function deleteThread($threadId) {
-        $sql = "UPDATE threads SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?";
+        $sql = "UPDATE threads SET deleted_at = datetime('now','localtime') WHERE id = ?";
         $this->db->query($sql, [$threadId]);
         
         $this->logger->info('Thread logically deleted', ['thread_id' => $threadId]);
     }
     
     public function updateThreadSystemPrompt($threadId, $systemPrompt) {
-        $sql = "UPDATE threads SET thread_system_prompt = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        $sql = "UPDATE threads SET thread_system_prompt = ?, updated_at = datetime('now','localtime') WHERE id = ?";
         $this->db->query($sql, [$systemPrompt, $threadId]);
         
         $this->logger->info('Thread system prompt updated', [

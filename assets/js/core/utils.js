@@ -14,9 +14,25 @@ class AppUtils {
      * 日付フォーマット（相対時間）
      */
     static formatDate(dateString) {
+        // Handle empty or invalid date strings
+        if (!dateString || dateString.trim() === '') {
+            return '不明';
+        }
+        
         const date = new Date(dateString);
+        
+        // Check if the date is valid
+        if (isNaN(date.getTime())) {
+            return '不明';
+        }
+        
         const now = new Date();
         const diff = now - date;
+        
+        // Handle future dates (should not happen but just in case)
+        if (diff < 0) {
+            return date.toLocaleDateString('ja-JP');
+        }
         
         if (diff < 60000) return 'たった今';
         if (diff < 3600000) return Math.floor(diff / 60000) + '分前';

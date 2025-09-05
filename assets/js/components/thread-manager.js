@@ -25,6 +25,18 @@ class ThreadManager {
     }
     
     /**
+     * 新規スレッドをリストに追加
+     */
+    addNewThreadToList(newThread) {
+        // 配列の先頭に新しいスレッドを追加
+        this.allThreads.unshift(newThread);
+        this.filteredThreads.unshift(newThread);
+        
+        // リストを再描画
+        this.renderThreads(this.filteredThreads);
+    }
+    
+    /**
      * スレッド一覧をレンダリング
      */
     renderThreads(threads) {
@@ -39,7 +51,7 @@ class ThreadManager {
             threadElement.innerHTML = `
                 <div class="thread-content" data-thread-id="${thread.id}">
                     <div class="thread-name" data-thread-name="${AppUtils.escapeHtml(thread.name)}">${AppUtils.escapeHtml(thread.name)}</div>
-                    <div class="thread-time">${AppUtils.formatDate(thread.updated_at)}</div>
+                    <div class="thread-time" data-raw-date="${thread.updated_at}">${AppUtils.formatDate(thread.updated_at)}</div>
                 </div>
                 <div class="thread-actions">
                     <button class="thread-edit-btn" data-thread-id="${thread.id}" title="編集">✏️</button>

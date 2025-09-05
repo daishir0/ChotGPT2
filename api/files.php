@@ -15,6 +15,15 @@ try {
     // データベースを初期化（初回起動時のみ作成）
     $dbInitializer = new DatabaseInitializer(__DIR__ . '/../config.php');
     $config = $dbInitializer->initializeDatabase();
+    
+    // configから取得したタイムゾーンを設定
+    if (isset($config['system']['timezone'])) {
+        date_default_timezone_set($config['system']['timezone']);
+    } else {
+        // フォールバック
+        date_default_timezone_set('Asia/Tokyo');
+    }
+    
     $logger = new Logger($config);
     $auth = new Auth($config);
     

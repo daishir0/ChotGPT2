@@ -324,8 +324,21 @@ class ChatManager {
                 // ボタン有効化
                 this.app.updateThreadDependentButtons();
                 
-                // スレッド一覧を更新
-                this.app.threadManager.loadThreads();
+                // スレッド一覧を更新 - 新規作成したスレッドを直接追加
+                const now = new Date();
+                const localDateTime = now.getFullYear() + '-' + 
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(now.getDate()).padStart(2, '0') + ' ' + 
+                    String(now.getHours()).padStart(2, '0') + ':' + 
+                    String(now.getMinutes()).padStart(2, '0') + ':' + 
+                    String(now.getSeconds()).padStart(2, '0');
+                
+                this.app.threadManager.addNewThreadToList({
+                    id: data.thread_id,
+                    name: data.thread_name,
+                    created_at: localDateTime,
+                    updated_at: localDateTime
+                });
                 
                 this.app.uiManager.hideTreeView();
             }

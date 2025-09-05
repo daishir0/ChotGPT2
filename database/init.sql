@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS threads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(255) NOT NULL,
     thread_system_prompt TEXT DEFAULT '',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT (datetime('now','localtime')),
+    updated_at DATETIME DEFAULT (datetime('now','localtime'))
 );
 
 -- メッセージテーブル（ツリー構造対応）
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS messages (
     content TEXT NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant')),
     is_context BOOLEAN DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT (datetime('now','localtime')),
     FOREIGN KEY (thread_id) REFERENCES threads (id) ON DELETE CASCADE,
     FOREIGN KEY (parent_message_id) REFERENCES messages (id) ON DELETE CASCADE
 );
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS files (
     content_markdown TEXT,
     metadata TEXT, -- JSON形式
     file_size INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT (datetime('now','localtime'))
 );
 
 -- メッセージ-ファイル関連テーブル
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS message_files (
 CREATE TABLE IF NOT EXISTS settings (
     key VARCHAR(100) PRIMARY KEY,
     value TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT (datetime('now','localtime')),
+    updated_at DATETIME DEFAULT (datetime('now','localtime'))
 );
 
 -- インデックス作成
@@ -67,5 +67,5 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
 CREATE TRIGGER IF NOT EXISTS update_thread_timestamp 
     AFTER INSERT ON messages 
     BEGIN 
-        UPDATE threads SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.thread_id;
+        UPDATE threads SET updated_at = datetime('now','localtime') WHERE id = NEW.thread_id;
     END;

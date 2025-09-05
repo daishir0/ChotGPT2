@@ -89,6 +89,7 @@ try {
             'log_rotation_days' => 30,
             'max_file_size' => 10 * 1024 * 1024, // 10MB
             'base_url' => '', // 空の場合は自動検出、例: '/chat2' or 'https://example.com/chat2'
+            'timezone' => 'Asia/Tokyo', // タイムゾーン設定
         ],
 
         // セキュリティ設定
