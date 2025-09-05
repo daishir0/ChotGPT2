@@ -12,9 +12,10 @@ ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tre
 
 This groundbreaking innovation transforms AI chat from one-size-fits-all to truly personalized, context-aware interactions.
 
-![chotgpt2](assets/chotgpt2.png)
+![setting persona](assets/setting_persona.png)
 
-![thread prompt](assets/thread_prompt.png)
+![www](assets/www.png)
+
 
 ## Installation
 
