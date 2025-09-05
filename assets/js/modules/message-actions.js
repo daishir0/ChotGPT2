@@ -166,8 +166,13 @@ class MessageActionsManager {
     async deleteMessage(messageId) {
         if (confirm('このメッセージを削除しますか？')) {
             try {
+                // 削除前に親メッセージIDを取得
+                const parentMessageId = this.getParentMessageId(messageId);
+                
                 const data = await this.app.apiClient.deleteMessage(messageId);
                 if (data.success) {
+                    // 削除後に親メッセージIDを設定（親がない場合はnull）
+                    this.app._currentMessageId = parentMessageId;
                     this.app.chatManager.loadMessages();
                     this.app.uiManager.loadTree();
                 }
@@ -175,6 +180,18 @@ class MessageActionsManager {
                 console.error('Delete message error:', error);
             }
         }
+    }
+    
+    /**
+     * 指定されたメッセージの親メッセージIDを取得
+     */
+    getParentMessageId(messageId) {
+        if (!this.app._currentThreadMessages || this.app._currentThreadMessages.length === 0) {
+            return null;
+        }
+        
+        const message = this.findMessageInTree(this.app._currentThreadMessages, messageId);
+        return message ? message.parent_message_id : null;
     }
     
     /**
