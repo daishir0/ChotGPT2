@@ -94,7 +94,7 @@ $csrfToken = $auth->generateCSRFToken();
                 </div>
                 <div class="chat-actions">
                     <button class="persona-btn" id="personaBtn" title="スレッドペルソナ設定">🎭</button>
-                    <button class="tree-toggle-btn" id="treeToggleBtn">🌳 ツリー表示</button>
+                    <button class="tree-toggle-btn" id="treeToggleBtn">🌳</button>
                 </div>
             </header>
             
