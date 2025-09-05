@@ -4,3 +4,4 @@ logs/
 uploads/
 .claude/
 tests/
+composer.phar
