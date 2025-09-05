@@ -404,6 +404,15 @@ body {
     border-color: var(--accent-color);
 }
 
+.persona-btn:disabled,
+.tree-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: var(--bg-secondary);
+    color: var(--text-muted);
+}
+
 /* Tree Panel */
 .tree-panel {
     background-color: var(--bg-secondary);

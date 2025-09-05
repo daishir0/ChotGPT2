@@ -101,6 +101,9 @@ class ThreadManager {
             item.classList.toggle('active', item.dataset.threadId == threadId);
         });
         
+        // Update thread-dependent buttons
+        this.app.updateThreadDependentButtons();
+        
         this.app.chatManager.loadMessages();
         this.app.uiManager.loadTree();
         this.app.settingsManager.loadThreadPersonaState();
@@ -230,6 +233,8 @@ class ThreadManager {
                                 <p>新しいチャットを開始するか、既存のスレッドを選択してください。</p>
                             </div>
                         `;
+                        // Update thread-dependent buttons
+                        this.app.updateThreadDependentButtons();
                         this.app.uiManager.hideTreeView();
                     }
                     // Reload threads to reflect the change

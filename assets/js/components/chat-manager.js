@@ -303,6 +303,9 @@ class ChatManager {
             this.app.fileAttachmentManager.updateFileAttachments();
         }
         
+        // Update thread-dependent buttons
+        this.app.updateThreadDependentButtons();
+        
         document.getElementById('currentThreadName').textContent = '新しいチャット';
         document.getElementById('messagesContainer').innerHTML = `
             <div class="welcome-message">

@@ -56,6 +56,9 @@ class ChotGPTApp {
         this.bindEvents();
         this.threadManager.loadThreads();
         this.mobileHandler.preventDoubleTabZoom();
+        
+        // 初期状態でスレッド依存ボタンを無効化
+        this.updateThreadDependentButtons();
     }
     
     /**
@@ -387,6 +390,23 @@ class ChotGPTApp {
     
     set currentThreadMessages(messages) {
         this._currentThreadMessages = messages;
+    }
+    
+    /**
+     * スレッド依存ボタンの状態を更新
+     */
+    updateThreadDependentButtons() {
+        const personaBtn = document.getElementById('personaBtn');
+        const treeToggleBtn = document.getElementById('treeToggleBtn');
+        
+        const hasThread = !!this.currentThread;
+        
+        if (personaBtn) {
+            personaBtn.disabled = !hasThread;
+        }
+        if (treeToggleBtn) {
+            treeToggleBtn.disabled = !hasThread;
+        }
     }
     
     /**
