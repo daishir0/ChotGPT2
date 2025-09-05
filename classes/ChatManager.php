@@ -173,10 +173,17 @@ class ChatManager {
     }
     
     public function deleteMessage($messageId) {
+        // First delete all child messages recursively
+        $deletedChildCount = $this->deleteChildMessages($messageId);
+        
+        // Then delete the specified message itself
         $sql = "DELETE FROM messages WHERE id = ?";
         $this->db->query($sql, [$messageId]);
         
-        $this->logger->info('Message deleted', ['message_id' => $messageId]);
+        $this->logger->info('Message and children deleted', [
+            'message_id' => $messageId,
+            'child_count' => $deletedChildCount
+        ]);
     }
     
     public function deleteChildMessages($messageId) {
