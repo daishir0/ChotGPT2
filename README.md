@@ -180,6 +180,44 @@ This groundbreaking innovation transforms AI chat from one-size-fits-all to trul
 - **Intelligent Defaults**: System automatically selects optimal model (GPT-5 Mini) for new users
 - **Fallback Handling**: Graceful degradation if model services are temporarily unavailable
 
+### Internationalization (i18n) Support
+
+ChotGPT2 features a comprehensive internationalization system supporting multiple languages:
+
+#### **Available Languages**
+- **English (en)**: Complete English interface (default)
+- **Japanese (ja)**: Full Japanese localization available
+
+#### **Language Features**
+- **Dynamic Language Detection**: Automatic language selection based on user preferences
+- **Translation System**: Professional PHP-based translation framework using JSON language files
+- **Comprehensive Coverage**: All user interface elements, error messages, and system notifications translated
+- **Developer-Friendly**: Easy to add new languages by creating additional JSON translation files
+
+#### **Technical Implementation**
+- **Language Class**: Robust `Language.php` class with caching and fallback support  
+- **Translation Files**: Structured JSON files in `lang/` directory (`en.json`, `ja.json`)
+- **Helper Functions**: Global `__()` and `t()` functions for easy translation calls
+- **Metadata Support**: Language metadata including direction, charset, and native names
+
+#### **Adding New Languages**
+1. Create new translation file: `lang/[language_code].json`
+2. Copy structure from existing `en.json` or `ja.json` 
+3. Translate all key-value pairs to target language
+4. Update `lang/metadata.json` with language information
+5. Language will be automatically detected and available
+
+#### **Usage Examples**
+```php
+// In PHP templates
+<?= __('navigation.new_chat') ?>
+<?= t('chat.welcome_message') ?>
+
+// In PHP code  
+$lang = Language::getInstance();
+echo $lang->t('errors.network_error');
+```
+
 ## Notes
 
 ### Security Considerations
@@ -383,6 +421,44 @@ ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有A
 - **モデルメタデータ**: 各モデルの価格、機能、性能特性を表示
 - **インテリジェントデフォルト**: システムが新規ユーザーに最適なモデル（GPT-5 Mini）を自動選択
 - **フォールバック処理**: モデルサービスが一時的に利用できない場合の優雅な劣化対応
+
+### 国際化（i18n）サポート
+
+ChotGPT2は複数言語をサポートする包括的な国際化システムを搭載：
+
+#### **利用可能言語**
+- **英語 (en)**: 完全な英語インターフェース（デフォルト）
+- **日本語 (ja)**: 完全な日本語ローカライゼーション対応
+
+#### **言語機能**
+- **動的言語検出**: ユーザー設定に基づく自動言語選択
+- **翻訳システム**: JSONファイルを使用したプロフェッショナルなPHP翻訳フレームワーク
+- **包括的対応**: すべてのUIエレメント、エラーメッセージ、システム通知を翻訳
+- **開発者フレンドリー**: JSON翻訳ファイルを追加するだけで新言語を簡単に追加可能
+
+#### **技術実装**
+- **Languageクラス**: キャッシュとフォールバック機能を持つ堅牢な`Language.php`クラス
+- **翻訳ファイル**: `lang/`ディレクトリ内の構造化JSONファイル（`en.json`、`ja.json`）
+- **ヘルパー関数**: 翻訳呼び出し用のグローバル`__()`と`t()`関数
+- **メタデータサポート**: 言語の方向、文字セット、ネイティブ名を含むメタデータ
+
+#### **新言語の追加方法**
+1. 新しい翻訳ファイルを作成: `lang/[言語コード].json`
+2. 既存の`en.json`または`ja.json`から構造をコピー
+3. すべてのキー・バリューペアを対象言語に翻訳
+4. `lang/metadata.json`に言語情報を追加
+5. 言語が自動検出され利用可能になります
+
+#### **使用例**
+```php
+// PHPテンプレート内
+<?= __('navigation.new_chat') ?>
+<?= t('chat.welcome_message') ?>
+
+// PHPコード内
+$lang = Language::getInstance();
+echo $lang->t('errors.network_error');
+```
 
 ## 注意点
 

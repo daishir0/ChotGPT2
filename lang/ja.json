@@ -1,0 +1,185 @@
+{
+    "app": {
+        "title": "ChotGPT - ChatGPT Clone",
+        "name": "ChotGPT2",
+        "description": "会話ツリーとスレッド固有AIペルソナを持つ高度なChatGPTクローン"
+    },
+    "auth": {
+        "login": "ログイン",
+        "logout": "ログアウト", 
+        "username": "ユーザー名",
+        "password": "パスワード",
+        "login_required": "ログインが必要です",
+        "invalid_credentials": "ユーザー名またはパスワードが正しくありません",
+        "session_expired": "セッションが期限切れです。再度ログインしてください。"
+    },
+    "navigation": {
+        "new_chat": "新規チャット",
+        "settings": "設定",
+        "files": "ファイル",
+        "tree_view": "ツリー表示",
+        "search": "検索",
+        "threads": "スレッド"
+    },
+    "chat": {
+        "placeholder": "メッセージを入力してください...",
+        "send": "送信",
+        "thinking": "考え中...",
+        "generating": "応答を生成中...",
+        "error_occurred": "エラーが発生しました",
+        "retry": "再試行",
+        "copy": "コピー",
+        "edit": "編集", 
+        "delete": "削除",
+        "branch": "分岐",
+        "message_copied": "メッセージをクリップボードにコピーしました",
+        "confirm_delete": "このメッセージとその分岐を削除しますか？",
+        "model_changed": "AIモデルを{model}に変更しました",
+        "select_chat": "チャットを選択してください",
+        "welcome_title": "ChotGPTへようこそ",
+        "welcome_message": "新しいチャットを開始するか、既存のスレッドを選択してください。"
+    },
+    "threads": {
+        "search_placeholder": "スレッドを検索...",
+        "no_results": "該当するスレッドが見つかりません",
+        "results_count": "{count} / {total} 件のスレッド",
+        "delete_thread": "スレッドを削除",
+        "confirm_delete": "このスレッドを削除しますか？",
+        "thread_deleted": "スレッドを削除しました",
+        "new_thread": "新規スレッド",
+        "untitled": "無題のスレッド"
+    },
+    "files": {
+        "title": "ファイル管理",
+        "upload": "ファイルアップロード",
+        "select_files": "ファイルを選択",
+        "uploading": "アップロード中...",
+        "upload_success": "ファイルのアップロードに成功しました",
+        "upload_error": "ファイルのアップロードに失敗しました",
+        "delete_file": "ファイルを削除",
+        "confirm_delete": "このファイルを削除しますか？",
+        "file_deleted": "ファイルを削除しました",
+        "supported_formats": "サポート形式",
+        "max_size": "最大サイズ: {size}MB",
+        "processing": "ファイル処理中...",
+        "no_files": "アップロードされたファイルはありません",
+        "drag_drop_text": "ファイルをドラッグ&ドロップ、またはクリックして選択",
+        "search_placeholder": "ファイルを検索...",
+        "grid_view": "グリッド表示",
+        "list_view": "リスト表示",
+        "sort_name": "名前順",
+        "sort_date": "日付順",
+        "sort_size": "サイズ順",
+        "sort_type": "タイプ順",
+        "all_types": "すべて",
+        "selected": "個選択中",
+        "download": "ダウンロード",
+        "cancel": "キャンセル",
+        "attach_selected": "選択したファイルを添付",
+        "clear_selection": "選択解除"
+    },
+    "settings": {
+        "title": "設定",
+        "general": "一般",
+        "ai_model": "AIモデル",
+        "system_prompt": "システムプロンプト",
+        "thread_prompt": "スレッド固有プロンプト",
+        "language": "言語",
+        "theme": "テーマ",
+        "save": "設定を保存",
+        "saved": "設定を保存しました",
+        "error": "設定の保存に失敗しました",
+        "reset": "デフォルトにリセット",
+        "confirm_reset": "すべての設定をデフォルトに戻しますか？",
+        "thread_persona": "スレッドペルソナ設定"
+    },
+    "models": {
+        "gpt4": "GPT-4",
+        "gpt4_turbo": "GPT-4 Turbo", 
+        "gpt4o": "GPT-4o",
+        "gpt4o_mini": "GPT-4o Mini",
+        "gpt5": "GPT-5",
+        "gpt5_mini": "GPT-5 Mini",
+        "gpt5_nano": "GPT-5 Nano",
+        "loading": "利用可能なモデルを読み込み中...",
+        "error": "モデルの読み込みに失敗しました"
+    },
+    "tree": {
+        "title": "会話ツリー",
+        "navigate_to": "このメッセージに移動",
+        "branch_point": "分岐ポイント",
+        "current_position": "現在の位置"
+    },
+    "errors": {
+        "network_error": "ネットワーク接続エラー",
+        "server_error": "サーバーエラーが発生しました", 
+        "invalid_request": "無効なリクエストです",
+        "permission_denied": "権限が拒否されました",
+        "file_too_large": "ファイルサイズが大きすぎます",
+        "unsupported_format": "サポートされていないファイル形式です",
+        "quota_exceeded": "API制限を超えました",
+        "rate_limit": "レート制限に達しました。しばらくしてから再試行してください。",
+        "unknown_error": "不明なエラーが発生しました"
+    },
+    "success": {
+        "operation_completed": "操作が正常に完了しました",
+        "file_uploaded": "ファイルのアップロードに成功しました",
+        "settings_saved": "設定を保存しました",
+        "thread_created": "新しいスレッドを作成しました",
+        "message_sent": "メッセージを送信しました"
+    },
+    "loading": {
+        "please_wait": "お待ちください...",
+        "loading": "読み込み中...",
+        "processing": "処理中...",
+        "initializing": "初期化中..."
+    },
+    "common": {
+        "ok": "OK",
+        "cancel": "キャンセル",
+        "yes": "はい", 
+        "no": "いいえ",
+        "close": "閉じる",
+        "next": "次へ",
+        "previous": "前へ",
+        "search": "検索",
+        "clear": "クリア",
+        "select": "選択",
+        "upload": "アップロード",
+        "download": "ダウンロード",
+        "refresh": "更新",
+        "save": "保存",
+        "reset": "リセット",
+        "delete": "削除"
+    },
+    "setup": {
+        "welcome": "ChotGPT2セットアップへようこそ",
+        "database_setup": "データベース設定", 
+        "admin_account": "管理者アカウント",
+        "api_configuration": "API設定",
+        "openai_key": "OpenAI APIキー",
+        "base_url": "ベースURL（オプション）",
+        "timezone": "タイムゾーン",
+        "complete_setup": "セットアップ完了",
+        "setup_successful": "セットアップが正常に完了しました！",
+        "setup_error": "セットアップに失敗しました。設定を確認してください。"
+    },
+    "messages": {
+        "edit_message": "メッセージを編集",
+        "message_content": "メッセージ内容",
+        "edit_placeholder": "メッセージを編集してください...",
+        "branch_message": "メッセージを分岐",
+        "branch_content": "分岐メッセージ内容",
+        "branch_placeholder": "分岐メッセージを入力してください...",
+        "create_branch": "分岐作成",
+        "update_message": "メッセージを更新"
+    },
+    "persona": {
+        "hint": "基本システムプロンプトに追加適用されます",
+        "placeholder": "このスレッド専用のAIペルソナを設定できます。\n\n例：\n- あなたは親しみやすい関西弁で話すAIアシスタントです。\n- あなたは技術に詳しいエンジニアとして回答してください。\n- あなたは創作小説のキャラクター「田中花子」として話してください。\n\nここで設定した内容は、基本システムプロンプトに追加で適用されます。"
+    },
+    "theme": {
+        "dark": "ダーク",
+        "light": "ライト"
+    }
+}
