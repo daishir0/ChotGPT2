@@ -1,5 +1,8 @@
 # ChotGPT2
 
+> **⚠️ PROJECT MIGRATION NOTICE**  
+> This project has been moved to **[ChatBranch](https://github.com/daishir0/ChatBranch)** due to OpenAI's terms of service restrictions. Please use the new repository for the latest updates and continued development.
+
 ## Overview
 ChotGPT2 is an advanced ChatGPT clone system with sophisticated conversation tree functionality and **revolutionary thread-specific AI personas**. It provides a web-based chat interface with branching conversations, message editing, file management, and **dynamic AI model switching with GPT-5 series support**. The system features an intuitive tree visualization for conversation branches and supports multiple file formats including **CSV files** for context-aware conversations. Enhanced with **mobile-optimized UX**, **real-time thread search**, **comprehensive Markdown rendering with LaTeX math support**, **complete Mermaid diagram visualization**, **intelligent model management system**, and **responsive design** for seamless cross-platform usage.
 
@@ -256,6 +259,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 # ChotGPT2
+
+> **⚠️ プロジェクト移行のお知らせ**  
+> このプロジェクトはOpenAI利用規約の制限により、**[ChatBranch](https://github.com/daishir0/ChatBranch)** に移行しました。最新のアップデートと継続的な開発については新しいリポジトリをご利用ください。
 
 ## 概要
 ChotGPT2は、高度な会話ツリー機能と**革新的なスレッド固有AIペルソナ**を持つChatGPTクローンシステムです。会話の分岐、メッセージ編集、ファイル管理、**GPT-5シリーズサポートによる動的AIモデル切り替え機能**を備えたWebベースのチャットインターフェースを提供します。会話の分岐を視覚化する直感的なツリー表示機能があり、**CSVファイル**を含む複数のファイル形式をサポートしてコンテキスト対応の会話が可能です。**モバイル最適化されたUX**、**リアルタイムスレッド検索**、**LaTeX数式対応の包括的Markdownレンダリング**、**完全なMermaid図表可視化**、**インテリジェントモデル管理システム**、**レスポンシブデザイン**により、シームレスなクロスプラットフォーム使用を実現しています。
