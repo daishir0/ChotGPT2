@@ -28,7 +28,7 @@ class MessageActionsManager {
             }
         } catch (error) {
             console.error('Get message error:', error);
-            alert('メッセージの取得に失敗しました');
+            alert('Failed to retrieve message');
         }
     }
     
@@ -39,12 +39,12 @@ class MessageActionsManager {
         const newContent = document.getElementById('editMessageTextarea').value.trim();
         
         if (!newContent) {
-            alert('メッセージ内容を入力してください');
+            alert('Please enter message content');
             return;
         }
         
         if (!this.currentEditMessageId) {
-            alert('エラー: 編集対象のメッセージが見つかりません');
+            alert('Error: Target message for editing not found');
             return;
         }
         
@@ -66,7 +66,7 @@ class MessageActionsManager {
                 
                 // Check if AI response generation was successful
                 if (data.ai_response && data.ai_response.error) {
-                    alert('メッセージは更新されましたが、AI応答の生成に失敗しました: ' + data.ai_response.error);
+                    alert('Message was updated but AI response generation failed: ' + data.ai_response.error);
                 } else if (data.ai_response) {
                     console.log('AI response generated:', data.ai_response);
                 }
@@ -76,11 +76,11 @@ class MessageActionsManager {
                 this.app.uiManager.loadTree();
                 this.currentEditMessageId = null;
             } else {
-                alert('メッセージの更新に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+                alert('Failed to update message: ' + (data.error || data.message || 'Unknown error'));
             }
         } catch (error) {
             console.error('Edit message error:', error);
-            alert('メッセージの更新中にエラーが発生しました');
+            alert('An error occurred while updating the message');
         } finally {
             // Hide loading spinner
             document.getElementById('loadingSpinner').style.display = 'none';
@@ -109,12 +109,12 @@ class MessageActionsManager {
         const content = document.getElementById('branchMessageTextarea').value.trim();
         
         if (!content) {
-            alert('分岐メッセージ内容を入力してください');
+            alert('Please enter branch message content');
             return;
         }
         
         if (!this.currentBranchParentId) {
-            alert('エラー: 分岐元のメッセージが見つかりません');
+            alert('Error: Source message for branching not found');
             return;
         }
         
@@ -139,7 +139,7 @@ class MessageActionsManager {
                 
                 // Check if AI response generation was successful
                 if (data.ai_response && data.ai_response.error) {
-                    alert('分岐は作成されましたが、AI応答の生成に失敗しました: ' + data.ai_response.error);
+                    alert('Branch was created but AI response generation failed: ' + data.ai_response.error);
                 } else if (data.ai_response) {
                     console.log('AI response generated for branch:', data.ai_response);
                 }
@@ -149,11 +149,11 @@ class MessageActionsManager {
                 this.app.uiManager.loadTree();
                 this.currentBranchParentId = null;
             } else {
-                alert('分岐の作成に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+                alert('Failed to create branch: ' + (data.error || data.message || 'Unknown error'));
             }
         } catch (error) {
             console.error('Branch message error:', error);
-            alert('分岐の作成中にエラーが発生しました');
+            alert('An error occurred while creating the branch');
         } finally {
             // Hide loading spinner
             document.getElementById('loadingSpinner').style.display = 'none';
@@ -164,7 +164,7 @@ class MessageActionsManager {
      * メッセージを削除
      */
     async deleteMessage(messageId) {
-        if (confirm('このメッセージを削除しますか？')) {
+        if (confirm('Are you sure you want to delete this message?')) {
             try {
                 // 削除前に親メッセージIDを取得
                 const parentMessageId = this.getParentMessageId(messageId);
@@ -250,7 +250,7 @@ class MessageActionsManager {
         } catch (error) {
             console.error('Copy failed:', error);
             console.error('Error stack:', error.stack);
-            alert(`コピーに失敗しました: ${error.message}`);
+            alert(`Copy failed: ${error.message}`);
         }
     }
     
@@ -426,8 +426,8 @@ class MessageActionsManager {
             
         } catch (extractError) {
             console.error('Text extraction error:', extractError);
-            // 緊急時のフォールバック
-            textContent = messageTextElement.innerText || messageTextElement.textContent || 'テキスト抽出エラー';
+            // Emergency fallback
+            textContent = messageTextElement.innerText || messageTextElement.textContent || 'Text extraction error';
         }
         
         if (!textContent || !textContent.trim()) {
@@ -459,7 +459,7 @@ class MessageActionsManager {
             
             // 一時的に成功表示
             button.textContent = '✅';
-            button.title = 'コピーしました！';
+            button.title = 'Copied!';
             button.classList.add('copy-success');
             
             // 2秒後に元に戻す

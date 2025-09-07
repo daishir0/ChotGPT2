@@ -7,7 +7,7 @@ class UrlHelper {
         if (!empty($config['system']['base_url'])) {
             self::$baseUrl = rtrim($config['system']['base_url'], '/');
         } else {
-            // 自動検出
+            // Auto detection
             self::$baseUrl = self::detectBaseUrl();
         }
     }
@@ -16,12 +16,12 @@ class UrlHelper {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         
-        // スクリプトのパスから基準URLを推測
+        // Infer base URL from script path
         $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
         $pathInfo = pathinfo($scriptName);
         $basePath = $pathInfo['dirname'];
         
-        // ルートの場合は空文字に
+        // Empty string for root
         if ($basePath === '/' || $basePath === '\\') {
             $basePath = '';
         }
@@ -37,12 +37,12 @@ class UrlHelper {
         $baseUrl = self::getBaseUrl();
         $apiPath = '/api';
         
-        // 相対パスの場合
+        // For relative paths
         if (strpos($baseUrl, 'http') !== 0) {
             return $baseUrl . $apiPath . ($endpoint ? '/' . ltrim($endpoint, '/') : '');
         }
         
-        // 絶対URLの場合
+        // For absolute URLs
         return $baseUrl . $apiPath . ($endpoint ? '/' . ltrim($endpoint, '/') : '');
     }
     
@@ -56,7 +56,7 @@ class UrlHelper {
         return $baseUrl . ($path ? '/' . ltrim($path, '/') : '');
     }
     
-    // JavaScriptで使用するためのURL情報を取得
+    // Get URL information for JavaScript use
     public static function getJsConfig() {
         return [
             'baseUrl' => self::getBaseUrl(),

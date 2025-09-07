@@ -9,30 +9,30 @@ class DatabaseInitializer {
     }
     
     public function initializeDatabase() {
-        // 設定ファイルを読み込み
+        // Load configuration file
         $this->config = require $this->configPath;
         
-        // データベースパスが設定されているかチェック
+        // Check if database path is configured
         if (!isset($this->config['database']['path']) || empty($this->config['database']['path'])) {
-            // 初回起動：ランダムDBファイルを生成して設定を保存
+            // First startup: Generate random DB file and save config
             return $this->createInitialDatabase();
         }
         
         $dbPath = $this->config['database']['path'];
         
-        // 設定されているパスがランダム生成形式の場合（毎回新しくなる）
+        // If configured path is random generation format (changes every time)
         if (strpos($dbPath, 'random_bytes') !== false || strpos($dbPath, 'bin2hex') !== false) {
-            // 古い形式の設定：新しい固定DBに移行
+            // Old format config: migrate to new fixed DB
             return $this->migrateToFixedDatabase();
         }
         
-        // 既存のDBファイルが存在するかチェック
+        // Check if existing DB file exists
         if (!file_exists($dbPath)) {
-            // DBファイルが削除された場合：設定をクリアして再初期化
+            // If DB file is deleted: clear config and reinitialize
             return $this->createInitialDatabase();
         }
         
-        // 既存のDBを使用
+        // Use existing DB
         return $this->config;
     }
     
@@ -86,7 +86,7 @@ class DatabaseInitializer {
             require_once __DIR__ . '/Database.php';
             $tempConfig = ['database' => ['path' => $dbPath]];
             $db = Database::getInstance($tempConfig);
-            // テーブル作成は Database クラス内で自動実行される
+            // Table creation is automatically executed within the Database class
         } catch (Exception $e) {
             error_log("Database creation failed: " . $e->getMessage());
             throw $e;
@@ -96,18 +96,18 @@ class DatabaseInitializer {
     private function saveConfig() {
         $configContent = $this->generateConfigContent($this->config);
         
-        // バックアップを作成
+        // Create backup
         if (file_exists($this->configPath)) {
             copy($this->configPath, $this->configPath . '.backup');
         }
         
-        // 新しい設定を保存
+        // Save new configuration
         file_put_contents($this->configPath, $configContent, LOCK_EX);
     }
     
     private function generateConfigContent($config) {
         $content = "<?php\n";
-        $content .= "// ChotGPT 設定ファイル\n";
+        $content .= "// ChotGPT Configuration File\n";
         $content .= "// Database path automatically configured on first run\n\n";
         $content .= "return [\n";
         

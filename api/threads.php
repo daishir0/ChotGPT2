@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 基本認証チェック
+// Basic authentication check
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Authentication required']);

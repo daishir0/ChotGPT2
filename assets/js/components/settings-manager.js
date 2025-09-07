@@ -25,7 +25,7 @@ class SettingsManager {
                 this.renderModelSelect();
             } else {
                 console.error('Failed to load models:', data.error);
-                // フォールバック
+                // Fallback
                 this.availableModels = [
                     { id: 'gpt-5', name: 'GPT-5 (Full Model)', description: 'Most capable model', category: 'premium', enabled: true },
                     { id: 'gpt-5-mini', name: 'GPT-5 Mini (Recommended)', description: 'Perfect balance', category: 'standard', enabled: true, default: true },
@@ -56,7 +56,7 @@ class SettingsManager {
         
         modelSelect.innerHTML = '';
         
-        // 有効なモデルのみ表示
+        // Show only enabled models
         const enabledModels = this.availableModels.filter(model => model.enabled);
         
         enabledModels.forEach(model => {
@@ -64,7 +64,7 @@ class SettingsManager {
             option.value = model.id;
             option.textContent = model.name;
             
-            // 説明があれば追加
+            // Add description if available
             if (model.description) {
                 option.title = model.description;
             }
@@ -134,7 +134,7 @@ class SettingsManager {
             console.log('Settings saved to server');
         } catch (error) {
             console.error('Settings save error:', error);
-            alert('設定の保存中にエラーが発生しました。サーバーに接続できません。');
+            alert('An error occurred while saving settings. Cannot connect to server.');
             throw error; // Re-throw to prevent silent failures
         }
     }
@@ -156,10 +156,10 @@ class SettingsManager {
     applyTheme() {
         document.body.className = this.settings.theme + '-theme';
         
-        // Mermaidテーマも更新
+        // Also update Mermaid theme
         if (typeof mermaid !== 'undefined' && this.messageRenderer) {
             this.messageRenderer.initializeMermaidTheme();
-            // 既存の図表を再レンダリング（オプション）
+            // Re-render existing diagrams (optional)
             this.reRenderMermaidDiagrams();
         }
     }
@@ -173,7 +173,7 @@ class SettingsManager {
             diagram.classList.remove('mermaid-processed');
         });
         
-        // 少し遅延してから再レンダリング
+        // Re-render after a short delay
         setTimeout(() => {
             if (this.messageRenderer) {
                 this.messageRenderer.processMermaidDiagrams();
@@ -186,7 +186,7 @@ class SettingsManager {
      */
     async showThreadPersona() {
         if (!this.app.currentThread) {
-            alert('スレッドを選択してください');
+            alert('Please select a thread');
             return;
         }
         
@@ -205,7 +205,7 @@ class SettingsManager {
             }
         } catch (error) {
             console.error('Thread persona load error:', error);
-            alert('ペルソナ設定の読み込みに失敗しました');
+            alert('Failed to load persona settings');
         }
     }
     
@@ -214,14 +214,14 @@ class SettingsManager {
      */
     async saveThreadPersona() {
         if (!this.app.currentThread) {
-            alert('スレッドが選択されていません');
+            alert('No thread selected');
             return;
         }
         
         const persona = document.getElementById('threadPersonaTextarea').value.trim();
         
         if (persona.length > 50000) {
-            alert('ペルソナは50000文字以内で入力してください');
+            alert('Please enter persona within 50,000 characters');
             return;
         }
         
@@ -233,16 +233,16 @@ class SettingsManager {
                 
                 // Show notification for future messages
                 if (persona) {
-                    this.showNotification('ペルソナが設定されました。新しいメッセージから適用されます。');
+                    this.showNotification('Persona has been set. It will be applied to new messages.');
                 } else {
-                    this.showNotification('ペルソナがクリアされました。');
+                    this.showNotification('Persona has been cleared.');
                 }
             } else {
                 throw new Error(data.error || 'Failed to save thread persona');
             }
         } catch (error) {
             console.error('Thread persona save error:', error);
-            alert('ペルソナの保存に失敗しました');
+            alert('Failed to save persona');
         }
     }
     
@@ -250,7 +250,7 @@ class SettingsManager {
      * スレッドペルソナをクリア
      */
     clearThreadPersona() {
-        if (confirm('スレッドペルソナを削除しますか？')) {
+        if (confirm('Are you sure you want to delete the thread persona?')) {
             document.getElementById('threadPersonaTextarea').value = '';
             this.updatePersonaCharCount('');
         }
@@ -281,10 +281,10 @@ class SettingsManager {
         const personaBtn = document.getElementById('personaBtn');
         if (persona && persona.trim()) {
             personaBtn.classList.add('active');
-            personaBtn.title = 'スレッドペルソナ設定済み';
+            personaBtn.title = 'Thread persona is set';
         } else {
             personaBtn.classList.remove('active');
-            personaBtn.title = 'スレッドペルソナ設定';
+            personaBtn.title = 'Set thread persona';
         }
     }
     

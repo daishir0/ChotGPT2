@@ -1,0 +1,18 @@
+{
+    "en": {
+        "name": "English",
+        "nativeName": "English",
+        "direction": "ltr",
+        "charset": "UTF-8",
+        "country": "US",
+        "flag": "🇺🇸"
+    },
+    "ja": {
+        "name": "Japanese", 
+        "nativeName": "日本語",
+        "direction": "ltr",
+        "charset": "UTF-8",
+        "country": "JP",
+        "flag": "🇯🇵"
+    }
+}

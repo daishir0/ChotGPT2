@@ -10,7 +10,7 @@ class SettingsManager {
     }
     
     /**
-     * 全設定を取得
+     * Get all settings
      */
     public function getAllSettings() {
         try {
@@ -31,7 +31,7 @@ class SettingsManager {
     }
     
     /**
-     * 個別設定を取得
+     * Get individual setting
      */
     public function getSetting($key, $defaultValue = null) {
         try {
@@ -51,7 +51,7 @@ class SettingsManager {
     }
     
     /**
-     * 設定を保存
+     * Save settings
      */
     public function saveSetting($key, $value) {
         try {
@@ -76,7 +76,7 @@ class SettingsManager {
     }
     
     /**
-     * 複数設定を一括保存
+     * Bulk save multiple settings
      */
     public function saveSettings($settings) {
         try {
@@ -109,7 +109,7 @@ class SettingsManager {
     }
     
     /**
-     * 設定をデフォルト値にリセット
+     * Reset settings to default values
      */
     public function resetToDefaults() {
         try {
@@ -135,7 +135,7 @@ class SettingsManager {
     }
     
     /**
-     * 利用可能なモデル一覧を取得
+     * Get available model list
      */
     private function getAllowedModels() {
         try {
@@ -180,7 +180,7 @@ class SettingsManager {
     }
     
     /**
-     * 設定値の検証
+     * Validate setting values
      */
     private function validateSetting($key, $value) {
         switch ($key) {
@@ -217,7 +217,7 @@ class SettingsManager {
     }
     
     /**
-     * 値をデータベース保存形式に変換
+     * Convert values to database storage format
      */
     private function formatValue($value) {
         if (is_bool($value)) {
@@ -227,7 +227,7 @@ class SettingsManager {
     }
     
     /**
-     * データベースの値を適切な型に変換
+     * Convert database values to appropriate types
      */
     private function parseValue($value) {
         // Boolean values
@@ -240,7 +240,7 @@ class SettingsManager {
     }
     
     /**
-     * 設定が存在するかチェック
+     * Check if setting exists
      */
     public function hasSettings() {
         try {

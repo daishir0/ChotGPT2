@@ -173,7 +173,7 @@ class FileManager {
         fileList.innerHTML = '';
         
         if (files.length === 0) {
-            fileList.innerHTML = '<p class="text-muted">ファイルがありません</p>';
+            fileList.innerHTML = '<p class="text-muted">No files available</p>';
             return;
         }
         
@@ -250,10 +250,10 @@ class FileManager {
         const count = this.selectedFiles.length;
         
         if (count === 0) {
-            selectBtn.textContent = 'ファイルを選択';
+            selectBtn.textContent = 'Select Files';
             selectBtn.disabled = false;
         } else {
-            selectBtn.textContent = `${count}個のファイルを添付`;
+            selectBtn.textContent = `Attach ${count} File(s)`;
             selectBtn.disabled = false;
         }
     }
@@ -339,7 +339,7 @@ class FileManager {
     }
     
     async deleteFile(fileId) {
-        if (!confirm('このファイルを削除しますか？')) {
+        if (!confirm('Are you sure you want to delete this file?')) {
             return;
         }
         
@@ -583,8 +583,8 @@ class FileManager {
                 <span class="file-meta">${this.formatFileSize(file.file_size)} • ${this.formatDate(file.created_at)}</span>
             </div>
             <div class="file-actions">
-                <button class="action-btn" onclick="fileManager.copyFileContent(${file.id})" title="クリップボードにコピー">📋</button>
-                <button class="action-btn delete" onclick="fileManager.deleteFile(${file.id})" title="削除">🗑️</button>
+                <button class="action-btn" onclick="fileManager.copyFileContent(${file.id})" title="Copy to clipboard">📋</button>
+                <button class="action-btn delete" onclick="fileManager.deleteFile(${file.id})" title="Delete">🗑️</button>
             </div>
         `;
         
@@ -609,8 +609,8 @@ class FileManager {
                 </div>
             </div>
             <div class="file-actions">
-                <button class="action-btn" onclick="fileManager.copyFileContent(${file.id})" title="クリップボードにコピー">📋</button>
-                <button class="action-btn delete" onclick="fileManager.deleteFile(${file.id})" title="削除">🗑️</button>
+                <button class="action-btn" onclick="fileManager.copyFileContent(${file.id})" title="Copy to clipboard">📋</button>
+                <button class="action-btn delete" onclick="fileManager.deleteFile(${file.id})" title="Delete">🗑️</button>
             </div>
         `;
         
@@ -726,11 +726,11 @@ class FileManager {
             this.hideModal('deleteConfirmModal');
             
             // Show success message
-            this.showToast(`${this.filesToDelete.length}個のファイルを削除しました`, 'success');
+            this.showToast(`${this.filesToDelete.length} file(s) deleted successfully`, 'success');
             
         } catch (error) {
             console.error('Delete error:', error);
-            this.showToast('ファイルの削除に失敗しました', 'error');
+            this.showToast('Failed to delete files', 'error');
         }
         
         this.filesToDelete = null;
@@ -755,7 +755,7 @@ class FileManager {
             }
         } catch (error) {
             console.error('Download error:', error);
-            this.showToast('ファイルのダウンロードに失敗しました', 'error');
+            this.showToast('Failed to download file', 'error');
         }
     }
     
@@ -776,7 +776,7 @@ class FileManager {
         try {
             const file = this.allFiles.find(f => f.id === fileId);
             if (!file) {
-                this.showToast('ファイルが見つかりません', 'error');
+                this.showToast('File not found', 'error');
                 return;
             }
             
@@ -791,7 +791,7 @@ class FileManager {
                 if (data.success && data.file && data.file.content_markdown) {
                     content = data.file.content_markdown;
                 } else {
-                    this.showToast('ファイル内容を取得できませんでした', 'error');
+                    this.showToast('Failed to retrieve file content', 'error');
                     return;
                 }
             }
@@ -799,11 +799,11 @@ class FileManager {
             // クリップボードにコピー
             await this.copyTextToClipboard(content);
             this.showCopyFeedback(fileId);
-            this.showToast('ファイル内容をクリップボードにコピーしました', 'success');
+            this.showToast('File content copied to clipboard', 'success');
             
         } catch (error) {
             console.error('Copy file content error:', error);
-            this.showToast('コピーに失敗しました', 'error');
+            this.showToast('Copy failed', 'error');
         }
     }
     
@@ -847,12 +847,12 @@ class FileManager {
             const originalText = button.textContent;
             const originalTitle = button.title;
             
-            // 一時的に成功表示
+            // Temporarily show success
             button.textContent = '✅';
-            button.title = 'コピーしました！';
+            button.title = 'Copied!';
             button.classList.add('copy-success');
             
-            // 2秒後に元に戻す
+            // Revert after 2 seconds
             setTimeout(() => {
                 button.textContent = originalText;
                 button.title = originalTitle;

@@ -1,9 +1,9 @@
 <?php
 /**
- * ChotGPT Webベースセットアップ画面
+ * ChotGPT Web-Based Setup Interface
  */
 
-// 既にインストール済みかチェック
+// Check if already installed
 if (file_exists('config.php')) {
     header('Location: index.php');
     exit;
@@ -13,26 +13,26 @@ $step = intval($_GET['step'] ?? 1);
 $errors = [];
 $success = '';
 
-// Step 2: 実際のインストール処理
+// Step 2: Actual installation process
 if ($_POST['action'] ?? '' === 'install') {
     try {
-        // バリデーション
+        // Validation
         $username = trim($_POST['username'] ?? '');
         $password = trim($_POST['password'] ?? '');
         $openai_key = trim($_POST['openai_key'] ?? '');
         $base_url = trim($_POST['base_url'] ?? '');
         
-        if (empty($username)) $errors[] = 'ユーザー名は必須です';
-        if (empty($password)) $errors[] = 'パスワードは必須です';
-        if (strlen($password) < 1) $errors[] = 'パスワードは1文字以上にしてください';
-        if (empty($openai_key)) $errors[] = 'OpenAI APIキーは必須です';
-        if (!preg_match('/^sk-[a-zA-Z0-9]+/', $openai_key)) $errors[] = 'OpenAI APIキーの形式が正しくありません';
+        if (empty($username)) $errors[] = 'Username is required';
+        if (empty($password)) $errors[] = 'Password is required';
+        if (strlen($password) < 1) $errors[] = 'Password must be at least 1 character long';
+        if (empty($openai_key)) $errors[] = 'OpenAI API key is required';
+        if (!preg_match('/^sk-[a-zA-Z0-9]+/', $openai_key)) $errors[] = 'OpenAI API key format is invalid';
         
         if (empty($errors)) {
-            // インストール実行
+            // Execute installation
             $result = performInstallation($username, $password, $openai_key, $base_url);
             if ($result['success']) {
-                $step = 3; // 完了ステップ
+                $step = 3; // Completion step
                 $success = $result['message'];
                 $instanceId = $result['instance_id'];
             } else {
@@ -40,17 +40,17 @@ if ($_POST['action'] ?? '' === 'install') {
             }
         }
     } catch (Exception $e) {
-        $errors[] = 'インストールエラー: ' . $e->getMessage();
+        $errors[] = 'Installation Error: ' . $e->getMessage();
     }
 }
 
 function performInstallation($username, $password, $openai_key, $base_url) {
     try {
-        // 1. セキュアなインスタンス設定生成
+        // 1. Generate secure instance configuration
         $instanceId = bin2hex(random_bytes(12));
         $secretKey = bin2hex(random_bytes(32));
         
-        // 2. ディレクトリ作成
+        // 2. Create directories
         $dataDir = __DIR__ . '/data';
         $logsDir = __DIR__ . '/logs';
         $uploadsDir = __DIR__ . '/uploads';
@@ -59,11 +59,11 @@ function performInstallation($username, $password, $openai_key, $base_url) {
         if (!is_dir($logsDir)) mkdir($logsDir, 0755, true);
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
         
-        // 3. .htaccessでデータディレクトリを保護
+        // 3. Protect data directory with .htaccess
         $htaccessContent = "# ChotGPT Data Protection\nOrder deny,allow\nDeny from all\n";
         file_put_contents($dataDir . '/.htaccess', $htaccessContent);
         
-        // 4. 設定ファイル生成
+        // 4. Generate configuration file
         $dbName = "chotgpt_{$instanceId}.db";
         
         $config = [
@@ -111,18 +111,18 @@ function performInstallation($username, $password, $openai_key, $base_url) {
         file_put_contents('config.php', $configContent);
         chmod('config.php', 0600);
         
-        // 5. データベース初期化テスト
+        // 5. Test database initialization
         require_once 'classes/Database.php';
         $db = Database::getInstance($config);
         
         return [
             'success' => true,
-            'message' => 'インストールが完了しました！',
+            'message' => 'Installation completed successfully!',
             'instance_id' => $instanceId
         ];
         
     } catch (Exception $e) {
-        // エラー時はクリーンアップ
+        // Cleanup on error
         if (file_exists('config.php')) {
             unlink('config.php');
         }
@@ -134,11 +134,11 @@ function performInstallation($username, $password, $openai_key, $base_url) {
 }
 
 ?><!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChotGPT セットアップ</title>
+    <title>ChotGPT Setup</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -310,8 +310,8 @@ function performInstallation($username, $password, $openai_key, $base_url) {
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <h1>🚀 ChotGPT セットアップ</h1>
-            <p>ChatGPTクローンシステムの初期設定</p>
+            <h1>🚀 ChotGPT Setup</h1>
+            <p>Initial configuration for ChatGPT clone system</p>
         </div>
         
         <div class="setup-body">
@@ -323,30 +323,30 @@ function performInstallation($username, $password, $openai_key, $base_url) {
             
 
             <?php if ($step === 1): ?>
-                <!-- Step 1: システム要件確認 -->
+                <!-- Step 1: System requirements check -->
                 <div class="requirements">
-                    <h3>システム要件チェック</h3>
+                    <h3>System Requirements Check</h3>
                     <ul>
                         <li>PHP <?= PHP_VERSION ?></li>
-                        <li>PDO SQLite拡張</li>
-                        <li>cURL拡張</li>
-                        <li>JSON拡張</li>
-                        <li>書き込み権限</li>
+                        <li>PDO SQLite Extension</li>
+                        <li>cURL Extension</li>
+                        <li>JSON Extension</li>
+                        <li>Write Permissions</li>
                     </ul>
                 </div>
                 
                 <p style="margin-bottom: 2rem; color: #666;">
-                    ChotGPTを使用するために必要な設定を行います。<br>
-                    OpenAI APIキーとログイン情報が必要です。
+                    Configure the necessary settings to use ChotGPT.<br>
+                    You will need an OpenAI API key and login information.
                 </p>
                 
                 <form method="get">
                     <input type="hidden" name="step" value="2">
-                    <button type="submit" class="btn">設定を開始</button>
+                    <button type="submit" class="btn">Start Configuration</button>
                 </form>
 
             <?php elseif ($step == 2): ?>
-                <!-- Step 2: 設定入力 -->
+                <!-- Step 2: Configuration input -->
                 <?php if (!empty($errors)): ?>
                     <div class="alert alert-error">
                         <ul style="margin: 0; padding-left: 1.5rem;">
@@ -361,36 +361,36 @@ function performInstallation($username, $password, $openai_key, $base_url) {
                     <input type="hidden" name="action" value="install">
                     
                     <div class="form-group">
-                        <label for="username">管理者ユーザー名 *</label>
+                        <label for="username">Administrator Username *</label>
                         <input type="text" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? 'admin') ?>" required>
-                        <small>Basic認証で使用するユーザー名</small>
+                        <small>Username for Basic authentication</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="password">管理者パスワード *</label>
+                        <label for="password">Administrator Password *</label>
                         <input type="password" id="password" name="password" required minlength="1">
-                        <small>1文字以上のパスワードを設定してください</small>
+                        <small>Please set a password of at least 1 character</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="openai_key">OpenAI APIキー *</label>
+                        <label for="openai_key">OpenAI API Key *</label>
                         <input type="text" id="openai_key" name="openai_key" value="<?= htmlspecialchars($_POST['openai_key'] ?? '') ?>" required placeholder="sk-...">
-                        <small><a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a>から取得してください</small>
+                        <small>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></small>
                     </div>
 
                     <div class="form-group">
-                        <label for="base_url">ベースURL（オプション）</label>
+                        <label for="base_url">Base URL (Optional)</label>
                         <input type="text" id="base_url" name="base_url" value="<?= htmlspecialchars($_POST['base_url'] ?? '') ?>" placeholder="/chat2">
-                        <small>空欄の場合は自動検出されます（例: /chat2）</small>
+                        <small>Leave blank for auto-detection (example: /chat2)</small>
                     </div>
 
-                    <button type="submit" class="btn">インストール開始</button>
+                    <button type="submit" class="btn">Start Installation</button>
                 </form>
 
             <?php elseif ($step == 3): ?>
-                <!-- Step 3: 完了 -->
+                <!-- Step 3: Completion -->
                 <div class="completion-message">
-                    <h2>🎉 セットアップ完了！</h2>
+                    <h2>🎉 Setup Complete!</h2>
                     
                     <?php if (!empty($success)): ?>
                         <div class="alert alert-success">
@@ -399,27 +399,27 @@ function performInstallation($username, $password, $openai_key, $base_url) {
                     <?php endif; ?>
 
                     <div class="instance-info">
-                        <strong>インスタンス情報:</strong><br>
-                        インスタンスID: <code><?= htmlspecialchars($instanceId ?? 'Unknown') ?></code><br>
-                        データベース: <code>chotgpt_<?= htmlspecialchars($instanceId ?? 'Unknown') ?>.db</code><br>
-                        データディレクトリ: <code>./data/</code>
+                        <strong>Instance Information:</strong><br>
+                        Instance ID: <code><?= htmlspecialchars($instanceId ?? 'Unknown') ?></code><br>
+                        Database: <code>chotgpt_<?= htmlspecialchars($instanceId ?? 'Unknown') ?>.db</code><br>
+                        Data Directory: <code>./data/</code>
                     </div>
 
                     <p style="margin: 1.5rem 0;">
-                        ChotGPTの準備が完了しました。<br>
-                        以下のボタンからアプリケーションを開始できます。
+                        ChotGPT is now ready to use.<br>
+                        You can start the application using the button below.
                     </p>
 
                     <div class="warning">
-                        <strong>⚠️ 重要なセキュリティ通知</strong><br>
-                        セキュリティのため、以下のファイルを削除することを強く推奨します：<br>
+                        <strong>⚠️ Important Security Notice</strong><br>
+                        For security reasons, it is strongly recommended to delete this file:<br>
                         <code>setup.php</code><br>
-                        <small>削除するには: <code>rm setup.php</code></small>
+                        <small>To delete: <code>rm setup.php</code></small>
                     </div>
 
                     <div style="margin-top: 2rem;">
                         <a href="index.php" class="btn" style="text-decoration: none; display: inline-block; text-align: center;">
-                            ChotGPTを開始
+                            Start ChotGPT
                         </a>
                     </div>
                 </div>
@@ -428,14 +428,14 @@ function performInstallation($username, $password, $openai_key, $base_url) {
     </div>
 
     <script>
-        // フォーム送信時の確認
+        // Form submission confirmation
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('form[method="post"]');
             if (form) {
                 form.addEventListener('submit', function(e) {
                     const btn = form.querySelector('.btn');
                     btn.disabled = true;
-                    btn.textContent = 'インストール中...';
+                    btn.textContent = 'Installing...';
                 });
             }
         });

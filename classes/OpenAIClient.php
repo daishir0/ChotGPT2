@@ -52,11 +52,11 @@ class OpenAIClient {
             'messages' => $formattedMessages
         ];
         
-        // GPT-5シリーズでは max_completion_tokens と temperature=1 (デフォルト), 他のモデルでは max_tokens と設定値 を使用
+        // GPT-5 series uses max_completion_tokens and temperature=1 (default), other models use max_tokens and configured value
         if (strpos($model, 'gpt-5') === 0) {
             $data['max_completion_tokens'] = $this->config['openai']['max_tokens'];
-            // GPT-5シリーズではtemperature=1のみサポート（デフォルト値なので省略）
-            // $data['temperature'] = 1; // デフォルト値なので設定不要
+            // GPT-5 series only supports temperature=1 (omitted as default value)
+            // $data['temperature'] = 1; // No need to set as it's the default value
         } else {
             $data['max_tokens'] = $this->config['openai']['max_tokens'];
             $data['temperature'] = $this->config['openai']['temperature'];
@@ -74,7 +74,7 @@ class OpenAIClient {
             throw new Exception('OpenAI API Error: ' . $response['error']['message']);
         }
         
-        // デバッグ: レスポンス構造をログに記録
+        // Debug: Log response structure
         $this->logger->info('OpenAI API Full Response', [
             'model' => $model,
             'response_structure' => json_encode($response, JSON_PRETTY_PRINT),
@@ -84,9 +84,9 @@ class OpenAIClient {
         
         $content = $response['choices'][0]['message']['content'] ?? '';
         
-        // GPT-5シリーズでは構造が異なる可能性があるため、複数の場所をチェック
+        // GPT-5 series may have different structure, check multiple locations
         if (empty($content) && strpos($model, 'gpt-5') === 0) {
-            // GPT-5シリーズでの代替的なコンテンツ取得方法
+            // Alternative content retrieval method for GPT-5 series
             $content = $response['choices'][0]['message']['reasoning'] ?? 
                       $response['choices'][0]['content'] ?? 
                       $response['content'] ?? '';

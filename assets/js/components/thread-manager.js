@@ -54,8 +54,8 @@ class ThreadManager {
                     <div class="thread-time" data-raw-date="${thread.updated_at}">${AppUtils.formatDate(thread.updated_at)}</div>
                 </div>
                 <div class="thread-actions">
-                    <button class="thread-edit-btn" data-thread-id="${thread.id}" title="編集">✏️</button>
-                    <button class="thread-delete-btn" data-thread-id="${thread.id}" title="削除">🗑️</button>
+                    <button class="thread-edit-btn" data-thread-id="${thread.id}" title="Edit">✏️</button>
+                    <button class="thread-delete-btn" data-thread-id="${thread.id}" title="Delete">🗑️</button>
                 </div>
             `;
             
@@ -65,16 +65,28 @@ class ThreadManager {
                 this.selectThread(thread.id, thread.name);
             });
             
-            // Add touchstart event for better mobile responsiveness
+            // Add touch events for mobile responsiveness without preventing scroll
+            let touchStartY = 0;
+            let touchMoved = false;
+            
             threadContent.addEventListener('touchstart', (e) => {
-                // Prevent hover effects on touch devices
-                e.preventDefault();
-            }, { passive: false });
+                touchStartY = e.touches[0].clientY;
+                touchMoved = false;
+            }, { passive: true });
+            
+            threadContent.addEventListener('touchmove', (e) => {
+                // Check if user is scrolling
+                if (Math.abs(e.touches[0].clientY - touchStartY) > 10) {
+                    touchMoved = true;
+                }
+            }, { passive: true });
             
             threadContent.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                this.selectThread(thread.id, thread.name);
-            }, { passive: false });
+                // Only select thread if user didn't scroll
+                if (!touchMoved) {
+                    this.selectThread(thread.id, thread.name);
+                }
+            }, { passive: true });
             
             // Edit button event
             const editBtn = threadElement.querySelector('.thread-edit-btn');
@@ -164,13 +176,13 @@ class ThreadManager {
         const totalCount = this.allThreads.length;
         
         if (count === 0) {
-            resultsInfo.textContent = '該当するスレッドが見つかりません';
+            resultsInfo.textContent = 'No matching threads found';
             resultsInfo.style.color = 'var(--error-color)';
         } else if (count === totalCount) {
-            resultsInfo.textContent = `全 ${totalCount} 件のスレッド`;
+            resultsInfo.textContent = `All ${totalCount} threads`;
             resultsInfo.style.color = 'var(--text-secondary)';
         } else {
-            resultsInfo.textContent = `${count} / ${totalCount} 件のスレッド`;
+            resultsInfo.textContent = `${count} / ${totalCount} threads`;
             resultsInfo.style.color = 'var(--text-secondary)';
         }
         resultsInfo.style.display = 'block';
@@ -202,7 +214,7 @@ class ThreadManager {
      * スレッド名を編集
      */
     async editThreadName(threadId, currentName) {
-        const newName = prompt('スレッド名を編集:', currentName);
+        const newName = prompt('Edit thread name:', currentName);
         if (newName && newName.trim() && newName.trim() !== currentName) {
             try {
                 const data = await this.app.apiClient.updateThread(threadId, newName.trim());
@@ -216,11 +228,11 @@ class ThreadManager {
                     this.loadThreads();
                 } else {
                     console.error('Update thread failed:', data);
-                    alert('スレッド名の更新に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+                    alert('Failed to update thread name: ' + (data.error || data.message || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Edit thread error:', error);
-                alert('スレッド名の更新中にエラーが発生しました');
+                alert('An error occurred while updating thread name');
             }
         }
     }
@@ -229,7 +241,7 @@ class ThreadManager {
      * スレッドを削除
      */
     async deleteThread(threadId, threadName) {
-        if (confirm(`スレッド「${threadName}」を削除しますか？この操作は取り消せません。`)) {
+        if (confirm(`Are you sure you want to delete thread "${threadName}"? This action cannot be undone.`)) {
             try {
                 const data = await this.app.apiClient.deleteThread(threadId);
                 console.log('Delete thread response:', data);
@@ -238,11 +250,11 @@ class ThreadManager {
                     if (this.app._currentThread == threadId) {
                         this.app._currentThread = null;
                         this.app._currentMessageId = null;
-                        document.getElementById('currentThreadName').textContent = 'チャットを選択してください';
+                        document.getElementById('currentThreadName').textContent = 'Please select a chat';
                         document.getElementById('messagesContainer').innerHTML = `
                             <div class="welcome-message">
-                                <h3>ChotGPTへようこそ</h3>
-                                <p>新しいチャットを開始するか、既存のスレッドを選択してください。</p>
+                                <h3>Welcome to ChotGPT</h3>
+                                <p>Start a new chat or select an existing thread.</p>
                             </div>
                         `;
                         // Update thread-dependent buttons
@@ -253,11 +265,11 @@ class ThreadManager {
                     this.loadThreads();
                 } else {
                     console.error('Delete thread failed:', data);
-                    alert('スレッドの削除に失敗しました: ' + (data.error || data.message || '不明なエラー'));
+                    alert('Failed to delete thread: ' + (data.error || data.message || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Delete thread error:', error);
-                alert('スレッドの削除中にエラーが発生しました');
+                alert('An error occurred while deleting thread');
             }
         }
     }

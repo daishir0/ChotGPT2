@@ -88,14 +88,14 @@ try {
             'log_level' => 'info', // debug, info, warning, error
             'log_rotation_days' => 30,
             'max_file_size' => 10 * 1024 * 1024, // 10MB
-            'base_url' => '', // 空の場合は自動検出、例: '/chat2' or 'https://example.com/chat2'
-            'timezone' => 'Asia/Tokyo', // タイムゾーン設定
+            'base_url' => '', // Auto-detected if empty, e.g.: '/chat2' or 'https://example.com/chat2'
+            'timezone' => 'UTC', // Timezone setting
         ],
 
-        // セキュリティ設定
+        // Security settings
         'security' => [
             'csrf_token_name' => 'csrf_token',
-            'session_timeout' => 3600, // 1時間
+            'session_timeout' => 3600, // 1 hour
         ],
 
         // アップロード設定

@@ -48,8 +48,8 @@ class ChatManager {
                     console.warn('⚠️ fileAttachmentManager not available for cleanup');
                 }
                 
-                // スレッドIDの更新（新規チャット時のスレッド作成は削除済み）
-                // currentThreadは事前に設定済みのはず
+                // Update thread ID (thread creation for new chat has been removed)
+                // currentThread should be set in advance
                 
                 this.app._currentMessageId = data.assistant_message_id;
                 this.loadMessages();
@@ -209,8 +209,8 @@ class ChatManager {
         if (!messagePath || messagePath.length === 0) {
             container.innerHTML = `
                 <div class="welcome-message">
-                    <h3>ChotGPTへようこそ</h3>
-                    <p>新しいチャットを開始するか、既存のスレッドを選択してください。</p>
+                    <h3>Welcome to ChotGPT</h3>
+                    <p>Start a new chat or select an existing thread.</p>
                 </div>
             `;
             return;
@@ -241,23 +241,23 @@ class ChatManager {
         const avatar = message.role === 'user' ? 'U' : 'AI';
         const avatarClass = message.role === 'user' ? 'user' : 'assistant';
         
-        // アクションボタンの設定
+        // Configure action buttons
         let actionsHTML = '';
         if (message.role === 'user') {
-            // ユーザーメッセージ: 編集・分岐・削除ボタン
+            // User message: edit, branch, delete buttons
             const showBranchButton = userMessageIndex > 1;
             actionsHTML = `
                 <div class="message-actions">
-                    <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="編集">✏️</button>
-                    ${showBranchButton ? `<button class="message-action-btn" onclick="app.branchMessage(${message.id})" title="分岐">🌿</button>` : ''}
-                    <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="削除">🗑️</button>
+                    <button class="message-action-btn" onclick="app.editMessage(${message.id})" title="Edit">✏️</button>
+                    ${showBranchButton ? `<button class="message-action-btn" onclick="app.branchMessage(${message.id})" title="Branch">🌿</button>` : ''}
+                    <button class="message-action-btn" onclick="app.deleteMessage(${message.id})" title="Delete">🗑️</button>
                 </div>
             `;
         } else if (message.role === 'assistant') {
-            // AIメッセージ: コピーボタンのみ
+            // AI message: copy button only
             actionsHTML = `
                 <div class="message-actions ai-actions">
-                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="コピー">📋</button>
+                    <button class="message-action-btn copy-btn" onclick="app.copyMessage(${message.id})" title="Copy">📋</button>
                 </div>
             `;
         }
@@ -293,11 +293,11 @@ class ChatManager {
      */
     async newChat() {
         try {
-            // 新規スレッドをデータベースに作成
+            // Create new thread in database
             const data = await this.app.apiClient.createEmptyThread();
             
             if (data.success) {
-                // 作成されたスレッドを選択状態にする
+                // Set created thread as selected
                 this.app._currentThread = data.thread_id;
                 this.app._currentMessageId = null;
                 
@@ -307,24 +307,24 @@ class ChatManager {
                     this.app.fileAttachmentManager.updateFileAttachments();
                 }
                 
-                // UI更新
+                // Update UI
                 document.getElementById('currentThreadName').textContent = data.thread_name;
                 document.getElementById('messagesContainer').innerHTML = `
                     <div class="welcome-message">
-                        <h3>新しいチャットを開始</h3>
-                        <p>メッセージを入力してチャットを始めてください。</p>
+                        <h3>Start a New Chat</h3>
+                        <p>Enter a message to start chatting.</p>
                     </div>
                 `;
                 
-                // スレッド一覧の選択状態を更新
+                // Update thread list selection state
                 document.querySelectorAll('.thread-item').forEach(item => {
                     item.classList.toggle('active', item.dataset.threadId == data.thread_id);
                 });
                 
-                // ボタン有効化
+                // Enable buttons
                 this.app.updateThreadDependentButtons();
                 
-                // スレッド一覧を更新 - 新規作成したスレッドを直接追加
+                // Update thread list - directly add newly created thread
                 const now = new Date();
                 const localDateTime = now.getFullYear() + '-' + 
                     String(now.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -343,8 +343,8 @@ class ChatManager {
                 this.app.uiManager.hideTreeView();
             }
         } catch (error) {
-            console.error('新規スレッド作成エラー:', error);
-            // フォールバック：従来の動作
+            console.error('New thread creation error:', error);
+            // Fallback: traditional behavior
             this.app._currentThread = null;
             this.app._currentMessageId = null;
             
@@ -355,11 +355,11 @@ class ChatManager {
             
             this.app.updateThreadDependentButtons();
             
-            document.getElementById('currentThreadName').textContent = '新しいチャット';
+            document.getElementById('currentThreadName').textContent = 'New Chat';
             document.getElementById('messagesContainer').innerHTML = `
                 <div class="welcome-message">
-                    <h3>新しいチャットを開始</h3>
-                    <p>メッセージを入力してチャットを始めてください。</p>
+                    <h3>Start a New Chat</h3>
+                    <p>Enter a message to start chatting.</p>
                 </div>
             `;
             

@@ -295,7 +295,7 @@ function generateAIResponse($chatManager, $userMessageId, $systemPrompt, $model,
         
         // Return error but don't fail the entire edit operation
         return [
-            'error' => 'AI応答の生成に失敗しました: ' . $e->getMessage()
+            'error' => 'Failed to generate AI response: ' . $e->getMessage()
         ];
     }
 }

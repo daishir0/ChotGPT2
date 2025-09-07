@@ -69,29 +69,29 @@ class FileManager {
         if ($fileData['error'] !== UPLOAD_ERR_OK) {
             $this->logger->warning('File upload error', ['error_code' => $fileData['error'], 'file' => $fileData['name']]);
             
-            // 具体的なエラーメッセージを生成
+            // Generate specific error message
             switch ($fileData['error']) {
                 case UPLOAD_ERR_INI_SIZE:
-                    throw new Exception('ファイルサイズがPHPの制限値(' . ini_get('upload_max_filesize') . ')を超えています');
+                    throw new Exception('File size exceeds PHP limit (' . ini_get('upload_max_filesize') . ').');
                 case UPLOAD_ERR_FORM_SIZE:
-                    throw new Exception('ファイルサイズが制限値を超えています');
+                    throw new Exception('File size exceeds the limit.');
                 case UPLOAD_ERR_PARTIAL:
-                    throw new Exception('ファイルのアップロードが不完全です');
+                    throw new Exception('File upload is incomplete.');
                 case UPLOAD_ERR_NO_FILE:
-                    throw new Exception('ファイルが選択されていません');
+                    throw new Exception('No file selected.');
                 case UPLOAD_ERR_NO_TMP_DIR:
-                    throw new Exception('一時ディレクトリがありません');
+                    throw new Exception('Temporary directory not found.');
                 case UPLOAD_ERR_CANT_WRITE:
-                    throw new Exception('ディスクへの書き込みに失敗しました');
+                    throw new Exception('Failed to write to disk.');
                 default:
-                    throw new Exception('ファイルアップロードエラー (コード: ' . $fileData['error'] . ')');
+                    throw new Exception('File upload error (Code: ' . $fileData['error'] . ').');
             }
         }
         
         if ($fileData['size'] > $this->config['upload']['max_size']) {
             $this->logger->warning('File too large', ['size' => $fileData['size'], 'max_size' => $this->config['upload']['max_size'], 'file' => $fileData['name']]);
             $maxSizeMB = round($this->config['upload']['max_size'] / 1024 / 1024, 1);
-            throw new Exception("ファイルサイズが制限値({$maxSizeMB}MB)を超えています");
+            throw new Exception("File size exceeds limit ({$maxSizeMB}MB).");
         }
         
         $extension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
@@ -104,7 +104,7 @@ class FileManager {
                 'allowed_types' => $this->config['upload']['allowed_types']
             ]);
             $allowedStr = implode(', ', $this->config['upload']['allowed_types']);
-            throw new Exception("ファイル形式(.{$extension})は許可されていません。許可形式: {$allowedStr}");
+            throw new Exception("File format (.{$extension}) is not allowed. Allowed formats: {$allowedStr}");
         }
         
         return true;
@@ -228,7 +228,7 @@ class FileManager {
                 if ($isFirstRow) {
                     // First row as headers
                     $headers = $data;
-                    // BOM除去
+                    // Remove BOM
                     if (!empty($headers[0])) {
                         $headers[0] = ltrim($headers[0], "\xEF\xBB\xBF");
                     }
@@ -238,7 +238,7 @@ class FileManager {
                     $content .= "|" . str_repeat(" --- |", count($headers)) . "\n";
                     $isFirstRow = false;
                 } else {
-                    // Data rows - データをサニタイズ
+                    // Data rows - sanitize data
                     $sanitizedData = array_map(function($cell) {
                         return trim(str_replace(["|", "\n", "\r"], ["\\|", " ", " "], $cell));
                     }, $data);
